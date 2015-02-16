@@ -4,5 +4,6 @@
     <string name="app_name">Bluetooth Scanner</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-
+    <string name="ble_not_supported"> BLE not supported by phone</string>
+    <string name="ble_supported"> BLE supported by phone</string>
 </resources>
