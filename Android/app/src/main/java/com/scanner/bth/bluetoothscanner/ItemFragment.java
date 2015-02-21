@@ -2,6 +2,7 @@ package com.scanner.bth.bluetoothscanner;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
@@ -12,13 +13,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-
-import com.scanner.bth.bluetoothscanner.dummy.DummyContent;
+import java.util.ArrayList;
 
 /**
  * A fragment representing a list of Items.
@@ -52,70 +55,68 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
+// Device scan callback.
+    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+            new BluetoothAdapter.LeScanCallback() {
+                @Override
+                public void onLeScan(final BluetoothDevice device, int rssi,
+                                     byte[] scanRecord) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mAdapter.addDevice(device);
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            };
 
-    private class LeDeviceListAdapter implements ListAdapter {
+    private class LeDeviceListAdapter extends BaseAdapter {
 
-        @Override
-        public boolean areAllItemsEnabled() {
-            return false;
+        ArrayList<BluetoothDevice> bthList = new ArrayList<BluetoothDevice>();
+        Context context;
+
+        public LeDeviceListAdapter(Context context) {
+            super();
+            this.context = context;
+        }
+        public void addDevice(BluetoothDevice device) {
+            bthList.add(device);
         }
 
-        @Override
-        public boolean isEnabled(int position) {
-            return false;
-        }
-
-        @Override
-        public void registerDataSetObserver(DataSetObserver observer) {
-
-        }
-
-        @Override
-        public void unregisterDataSetObserver(DataSetObserver observer) {
-
+        public void clear() {
+            bthList.clear();
         }
 
         @Override
         public int getCount() {
-            return 0;
+            return bthList.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return null;
+            return bthList.get(position);
         }
 
         @Override
         public long getItemId(int position) {
-            return 0;
-        }
-
-        @Override
-        public boolean hasStableIds() {
-            return false;
+            return position;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            return null;
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            return 0;
-        }
-
-        @Override
-        public int getViewTypeCount() {
-            return 0;
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return false;
+            LayoutInflater inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            View rowView = inflater.inflate(R.layout.bth_scan_result_list_row, parent, false);
+            TextView textView = (TextView) rowView.findViewById(R.id.bth_scan_result_name);
+            ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
+            textView.setText(bthList.get(position).getName());
+            return rowView;
         }
     }
-    private ListAdapter mAdapter = new LeDeviceListAdapter();
+
+    private LeDeviceListAdapter mAdapter;
+
     // TODO: Rename and change types of parameters
     public static ItemFragment newInstance(String param1, String param2) {
         ItemFragment fragment = new ItemFragment();
@@ -151,8 +152,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
         // TODO: Change Adapter to display your content
-        mAdapter = new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, DummyContent.ITEMS);
+        mAdapter = new LeDeviceListAdapter(getActivity());
     }
 
     @Override
@@ -191,9 +191,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (null != mListener) {
-            // Notify the active callbacks interface (the activity, if the
-            // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
+            mListener.onFragmentInteraction((BluetoothDevice) mAdapter.getItem(position));
         }
     }
 
@@ -222,7 +220,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(String id);
+        public void onFragmentInteraction(BluetoothDevice device);
     }
 
 }
