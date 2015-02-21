@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
 import android.database.DataSetObserver;
@@ -33,8 +34,8 @@ import java.util.ArrayList;
  * interface.
  */
 public class ItemFragment extends Fragment implements AbsListView.OnItemClickListener {
-    public static final int REQUEST_ENABLE_BT = 1;
-    private BluetoothAdapter mBluetoothAdapter;
+
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -81,25 +82,30 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             this.context = context;
         }
         public void addDevice(BluetoothDevice device) {
+
             bthList.add(device);
         }
 
         public void clear() {
+
             bthList.clear();
         }
 
         @Override
         public int getCount() {
+
             return bthList.size();
         }
 
         @Override
         public Object getItem(int position) {
+
             return bthList.get(position);
         }
 
         @Override
         public long getItemId(int position) {
+
             return position;
         }
 
@@ -115,6 +121,10 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         }
     }
 
+    public void addDevice(ScanResult result) {
+        BluetoothDevice device = result.getDevice();
+
+    }
     private LeDeviceListAdapter mAdapter;
 
     // TODO: Rename and change types of parameters
@@ -142,15 +152,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-        final BluetoothManager bluetoothManager =
-                (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
 
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-
-        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }
         // TODO: Change Adapter to display your content
         mAdapter = new LeDeviceListAdapter(getActivity());
     }
@@ -191,7 +193,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (null != mListener) {
-            mListener.onFragmentInteraction((BluetoothDevice) mAdapter.getItem(position));
+            mListener.onClickDevice((BluetoothDevice) mAdapter.getItem(position));
         }
     }
 
@@ -220,7 +222,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onFragmentInteraction(BluetoothDevice device);
+        public void onClickDevice(BluetoothDevice device);
     }
 
 }

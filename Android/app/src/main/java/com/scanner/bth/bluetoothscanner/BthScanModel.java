@@ -1,8 +1,10 @@
 package com.scanner.bth.bluetoothscanner;
 
+import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.ScanResult;
+import android.os.Build;
 import android.os.Handler;
 import android.bluetooth.le.ScanCallback;
 
@@ -19,6 +21,7 @@ import java.util.List;
  *
  * Created by shaon on 2/21/2015.
  */
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class BthScanModel {
 
     public static interface BthScanView {
@@ -47,7 +50,7 @@ public class BthScanModel {
         public void onScanFailed(int errorCode) {
             super.onScanFailed(errorCode);
         }
-    }
+    };
 
     private final BluetoothAdapter mBluetoothAdapter;
     private boolean mScanning = false;
@@ -64,18 +67,35 @@ public class BthScanModel {
         mBluetoothAdapter = adapter;
     }
 
-    private void scanLeDevice(final boolean enable) {
+    public void scanLeDevice(final boolean enable) {
         if (enable) {
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     mScanning = false;
-                    mBluetoothAdapter.getBluetoothLeScanner().stopScan();
+                    mBluetoothAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
                 }
             }, SCAN_PERIOD);
 
             mScanning = true;
             mBluetoothAdapter.getBluetoothLeScanner().startScan(mLeScanCallback);
+        } else {
+            mScanning = false;
+            mBluetoothAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
         }
     }
+
+    public void attachView(BthScanView view) {
+        mViews.add(view);
+    }
+
+    public void deattachView(BthScanView view) {
+        mViews.remove(view);
+    }
+
+    public boolean isScanning() {
+        return mScanning;
+    }
+
+
 }

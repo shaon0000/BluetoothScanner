@@ -3,13 +3,10 @@ package com.scanner.bth.bluetoothscanner;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,15 +14,23 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Build;
-import android.widget.Toast;
 
 
 public class MainActivity extends ActionBarActivity implements ItemFragment.OnFragmentInteractionListener {
 
+    private BluetoothAdapter mBluetoothAdapter;
+    private BthScanModel mScanModel;
+    private ItemFragment mScanResultFragment;
 
-    private boolean mScanning;
-    private Handler mHandler;
+    public static final int REQUEST_ENABLE_BT = 1;
+
+    public BthScanModel.BthScanView mScanListener = new BthScanModel.BthScanView() {
+
+        @Override
+        public void onLeScan(ScanResult result) {
+            mScanResultFragment.addDevice(result);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +39,24 @@ public class MainActivity extends ActionBarActivity implements ItemFragment.OnFr
 
 
         if (savedInstanceState == null) {
+            mScanResultFragment = new ItemFragment();
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ItemFragment())
+                    .add(R.id.container, mScanResultFragment)
                     .commit();
         }
+
+        final BluetoothManager bluetoothManager =
+                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+
+        mBluetoothAdapter = bluetoothManager.getAdapter();
+
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+
+        mScanModel = new BthScanModel(mBluetoothAdapter);
+        mScanModel.attachView(mScanListener);
     }
 
 
@@ -64,8 +83,8 @@ public class MainActivity extends ActionBarActivity implements ItemFragment.OnFr
     }
 
     @Override
-    public void onFragmentInteraction(BluetoothDevice device) {
-
+    public void onClickDevice(BluetoothDevice device) {
+        // Fire up some detail on the device with another fragment
     }
 
     /**
