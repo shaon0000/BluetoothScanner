@@ -3,10 +3,11 @@ package com.scanner.bth.bluetoothscanner;
 import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 
 /**
@@ -72,7 +73,21 @@ public class DetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_detail, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+
+        TextView majorText = (TextView) rootView.findViewById(R.id.detail_layout_major);
+        TextView minorText = (TextView) rootView.findViewById(R.id.detail_layout_minor);
+        TextView prefixText = (TextView) rootView.findViewById(R.id.detail_layout_beacon_prefix);
+        TextView uuidText = (TextView) rootView.findViewById(R.id.detail_layout_uuid);
+        TextView txText = (TextView) rootView.findViewById(R.id.detail_layout_tx);
+
+        majorText.setText(major);
+        minorText.setText(minor);
+        prefixText.setText(beaconPrefix);
+        uuidText.setText(proximityUUUID);
+        txText.setText(tx);
+
+        return rootView;
     }
 
     // TODO: Rename method, update argument and hook method into UI event

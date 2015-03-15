@@ -1,6 +1,9 @@
 package com.scanner.bth.bluetoothscanner;
 
 /**
+ * We use this to parse the advertisement ID and pull up the right data. This in conjunction with
+ * some filter mechanism can be used to look for the right devices.
+ *
  * Created by shaon0000 on 2015-03-07.
  */
 public class BeaconParser {
@@ -17,11 +20,11 @@ public class BeaconParser {
 
         }
 
-        String major;
-        String minor;
-        String beacon_prefix;
-        String proximity_uuid;
-        String tx;
+        private String major;
+        private String minor;
+        private String beacon_prefix;
+        private String proximity_uuid;
+        private String tx;
 
         public String getMajor() {
             return major;
@@ -38,9 +41,16 @@ public class BeaconParser {
         public String getProximity_uuid() {
             return proximity_uuid;
         }
+
+        public String getTx() {
+            return tx;
+        }
     }
 
+
     final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+
+    // Convert bytes to a hex string
     public static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         for ( int j = 0; j < bytes.length; j++ ) {
@@ -51,12 +61,13 @@ public class BeaconParser {
         return new String(hexChars);
     }
 
+    // Convert a subarray to a hex string
     public static String subBytesToHex(byte[] bytes, int start, int end) {
         int length = end - start;
         byte[] sub_array = new byte[length];
 
         for (int i = 0; i < length; i++) {
-            sub_array[i] = bytes[i];
+            sub_array[i] = bytes[i + start];
         }
 
         return bytesToHex(sub_array);
@@ -68,17 +79,19 @@ public class BeaconParser {
             return null;
         }
 
-        int[] prefix = {13, 9};
-        int[] px_uuid = {prefix[0] + prefix[1], 16};
-        int[] major = {px_uuid[0] + px_uuid[1], 2};
-        int[] minor = {major[0] + major[1], 2};
+        int[] prefix = {13, 22};
+        int[] px_uuid = {22, 38};
+        int[] major = {38, 40};
+        int[] minor = {40, 42};
 
-        // We need to do a quick verify here to make sure prefix makes sense.
+        // We need to do a quick verify here to make sure prefix makes sense. Not all devices
+        // will properly fall into this mold. We can alternatively do a quick talk to make sure
+        // this is in fact the device I'm looking for.
 
-        return new BeaconData(subBytesToHex(bytes, prefix[0], prefix[0] + prefix[1]),
-                subBytesToHex(bytes, px_uuid[0], px_uuid[0] + px_uuid[1]),
-                subBytesToHex(bytes, major[0], major[0] + major[1]),
-                subBytesToHex(bytes, minor[0], minor[0] + minor[1]),
+        return new BeaconData(subBytesToHex(bytes, prefix[0],prefix[1]),
+                subBytesToHex(bytes, px_uuid[0], px_uuid[1]),
+                subBytesToHex(bytes, major[0], major[1]),
+                subBytesToHex(bytes, minor[0], minor[1]),
                 "");
     }
 }

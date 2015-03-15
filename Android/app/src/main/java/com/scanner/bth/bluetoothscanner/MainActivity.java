@@ -29,7 +29,9 @@ public class MainActivity extends ActionBarActivity implements
     private ItemFragment mScanResultFragment;
 
     public static final int REQUEST_ENABLE_BT = 1;
+
     private static final String TAG_LIST_FRAGMENT = "bth_list_fragment";
+    private static final String TAG_DETAIL_FRAGMENT = "bth_detail_framgment";
 
     @Override
     public void onFragmentInteraction(Uri uri) {
@@ -152,7 +154,18 @@ public class MainActivity extends ActionBarActivity implements
 
     @Override
     public void onClickDevice(BthScanResult result) {
-        result.getDevice();
+        Log.d(MainActivity.class.getSimpleName(), "value: " + result.getDevice().getAddress());
+        DetailFragment detailFragment = DetailFragment.newInstance(
+                result.getBeaconData().getBeacon_prefix(),
+                result.getBeaconData().getProximity_uuid(),
+                result.getBeaconData().getMajor(),
+                result.getBeaconData().getMinor(),
+                result.getBeaconData().getTx());
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, detailFragment)
+                        // Add this transaction to the back stack
+                .addToBackStack(TAG_DETAIL_FRAGMENT)
+                .commit();
     }
 
     /**
