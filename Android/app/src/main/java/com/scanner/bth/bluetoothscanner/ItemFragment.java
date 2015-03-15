@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,34 +57,19 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      * The Adapter which will be used to populate the ListView/GridView with
      * Views.
      */
-// Device scan callback.
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
-            new BluetoothAdapter.LeScanCallback() {
-                @Override
-                public void onLeScan(final BluetoothDevice device, int rssi,
-                                     byte[] scanRecord) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mAdapter.addDevice(device);
-                            mAdapter.notifyDataSetChanged();
-                        }
-                    });
-                }
-            };
 
     private class LeDeviceListAdapter extends BaseAdapter {
 
-        ArrayList<BluetoothDevice> bthList = new ArrayList<BluetoothDevice>();
+        ArrayList<MainActivity.BthScanResult> bthList = new ArrayList<MainActivity.BthScanResult>();
         Context context;
 
         public LeDeviceListAdapter(Context context) {
             super();
             this.context = context;
         }
-        public void addDevice(BluetoothDevice device) {
+        public void addDevice(MainActivity.BthScanResult result) {
 
-            bthList.add(device);
+            bthList.add(result);
         }
 
         public void clear() {
@@ -115,14 +101,18 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View rowView = inflater.inflate(R.layout.bth_scan_result_list_row, parent, false);
             TextView textView = (TextView) rowView.findViewById(R.id.bth_scan_result_name);
-            ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
-            textView.setText(bthList.get(position).getName());
+            StatusIndicatorView indicatorView = (StatusIndicatorView) rowView.findViewById(R.id.status_indicator);
+            BluetoothDevice device = bthList.get(position).getDevice();
+            Log.d(LeDeviceListAdapter.class.getSimpleName(), "getting view: " + device.getAddress());
+            textView.setText(device.getAddress());
+
             return rowView;
         }
     }
 
-    public void addDevice(ScanResult result) {
-        BluetoothDevice device = result.getDevice();
+    public void addDevice(MainActivity.BthScanResult result) {
+        mAdapter.addDevice(result);
+        mAdapter.notifyDataSetChanged();
 
     }
     private LeDeviceListAdapter mAdapter;
@@ -142,11 +132,19 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      * fragment (e.g. upon screen orientation changes).
      */
     public ItemFragment() {
+
+    }
+
+    public void clear() {
+        mAdapter.clear();
+        mAdapter.notifyDataSetInvalidated();
+        Log.d("FRAGMENT", "scanning item fragment");
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
 
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
@@ -193,7 +191,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (null != mListener) {
-            mListener.onClickDevice((BluetoothDevice) mAdapter.getItem(position));
+            mListener.onClickDevice((MainActivity.BthScanResult) mAdapter.getItem(position));
         }
     }
 
@@ -222,7 +220,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onClickDevice(BluetoothDevice device);
+        public void onClickDevice(MainActivity.BthScanResult result);
     }
 
 }

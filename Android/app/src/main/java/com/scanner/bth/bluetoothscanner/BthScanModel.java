@@ -3,6 +3,7 @@ package com.scanner.bth.bluetoothscanner;
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.os.Build;
 import android.os.Handler;
@@ -24,9 +25,15 @@ import java.util.List;
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class BthScanModel {
 
+    // View interface to know the current progress, result, or failure of a scan.
     public static interface BthScanView {
         public void onLeScan(ScanResult result);
+        public void onScanStart();
+        public void onScanFinish();
     }
+
+
+
     private ScanCallback mLeScanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
@@ -74,12 +81,16 @@ public class BthScanModel {
                 public void run() {
                     mScanning = false;
                     mBluetoothAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
+                    notifyScanFinish();
                 }
             }, SCAN_PERIOD);
 
+            notifyScanStart();
             mScanning = true;
             mBluetoothAdapter.getBluetoothLeScanner().startScan(mLeScanCallback);
+
         } else {
+            notifyScanFinish();
             mScanning = false;
             mBluetoothAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
         }
@@ -95,6 +106,18 @@ public class BthScanModel {
 
     public boolean isScanning() {
         return mScanning;
+    }
+
+    private void notifyScanStart() {
+        for (BthScanView view : mViews) {
+            view.onScanStart();
+        }
+    }
+
+    private void notifyScanFinish() {
+        for (BthScanView view : mViews) {
+            view.onScanFinish();
+        }
     }
 
 
