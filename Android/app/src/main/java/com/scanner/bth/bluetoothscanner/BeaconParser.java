@@ -63,7 +63,7 @@ public class BeaconParser {
 
     // Convert a subarray to a hex string
     public static String subBytesToHex(byte[] bytes, int start, int end) {
-        int length = end - start;
+        int length = end - start + 1;
         byte[] sub_array = new byte[length];
 
         for (int i = 0; i < length; i++) {
@@ -79,10 +79,10 @@ public class BeaconParser {
             return null;
         }
 
-        int[] prefix = {13, 22};
-        int[] px_uuid = {22, 38};
-        int[] major = {38, 40};
-        int[] minor = {40, 42};
+        int[] prefix = {0, 8};
+        int[] px_uuid = {9, 24};
+        int[] major = {25, 26};
+        int[] minor = {27, 28};
 
         // We need to do a quick verify here to make sure prefix makes sense. Not all devices
         // will properly fall into this mold. We can alternatively do a quick talk to make sure
@@ -90,8 +90,8 @@ public class BeaconParser {
 
         return new BeaconData(subBytesToHex(bytes, prefix[0],prefix[1]),
                 subBytesToHex(bytes, px_uuid[0], px_uuid[1]),
-                subBytesToHex(bytes, major[0], major[1]),
-                subBytesToHex(bytes, minor[0], minor[1]),
+                String.valueOf(Integer.parseInt(subBytesToHex(bytes, major[0], major[1]), 16)),
+                String.valueOf(Integer.parseInt(subBytesToHex(bytes, minor[0], minor[1]), 16)),
                 "");
     }
 }

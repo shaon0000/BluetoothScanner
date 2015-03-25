@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.Button;
 
 import com.sb.db.SqlCreateTableGenerator;
+import com.scanner.bth.db.DbHelper;
+import com.scanner.bth.db.Log;
 
 
 public class FlowPickActivity extends Activity {
@@ -23,11 +25,12 @@ public class FlowPickActivity extends Activity {
         newButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                long rowId = new DbHelper(FlowPickActivity.this).createLog("test");
                 Intent intent = new Intent(FlowPickActivity.this, MainActivity.class);
+                intent.putExtra(MainActivity.ROW_ID_EXTRA, rowId);
                 startActivity(intent);
             }
         });
-
-        SqlCreateTableGenerator gen = new SqlCreateTableGenerator();
     }
 }

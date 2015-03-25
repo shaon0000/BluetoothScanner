@@ -21,17 +21,15 @@ public class Log {
         return owner;
     }
 
+    public Long getLastSynced() {
+        return lastSynced;
+    }
+
     private Integer id;
     private Long timeCreated;
     private Long lastUpdated;
     private String owner;
-
-    public Log(Integer id, Long timeCreated, Long last_updated, String owner) {
-        this.id = id;
-        this.timeCreated = timeCreated;
-        this.lastUpdated = last_updated;
-        this.owner = owner;
-    }
+    private Long lastSynced;
 
     @Override
     public String toString() {
@@ -40,6 +38,16 @@ public class Log {
                 ", timeCreated=" + timeCreated +
                 ", lastUpdated=" + lastUpdated +
                 ", owner='" + owner + '\'' +
+                ", lastSync=" + lastSynced +
                 '}';
     }
+
+    public Log(Integer id, Long timeCreated, Long last_updated, String owner, Long lastSynced) {
+        this.id = id;
+        this.timeCreated = timeCreated;
+        this.lastUpdated = last_updated;
+        this.owner = owner;
+        this.lastSynced = lastSynced;
+    }
+
 }

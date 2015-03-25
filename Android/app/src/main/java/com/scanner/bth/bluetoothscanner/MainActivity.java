@@ -24,6 +24,8 @@ import android.view.ViewGroup;
 public class MainActivity extends ActionBarActivity implements
         ItemFragment.OnFragmentInteractionListener, DetailFragment.OnFragmentInteractionListener {
 
+    public static final String ROW_ID_EXTRA = "com.scanner.bth.bluetoothscanner.MainActivity.ROW_ID_EXTRA";
+
     private BluetoothAdapter mBluetoothAdapter;
     private BthScanModel mScanModel;
     private ItemFragment mScanResultFragment;

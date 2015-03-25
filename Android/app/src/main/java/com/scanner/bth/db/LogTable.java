@@ -19,14 +19,19 @@ class LogTable extends BaseTable<Log> {
     public static final Column TIME_CREATED = new Column("time_created", Column.LONG);
     public static final Column OWNER = new Column("owner", Column.STRING);
     public static final Column LAST_UPDATED = new Column("last_updated", Column.LONG);
+    public static final Column LAST_SYNC = new Column("last_sync", Column.LONG);
 
-    private ArrayList<Column> mColumns = new ArrayList<Column>();
+    private static ArrayList<Column> mColumns = new ArrayList<Column>();
     static {
-        columns.add(_ID);
-        columns.add(TIME_CREATED);
-        columsn.add(LAST_UPDATED);
-        columns.add(OWNER);
+
+            mColumns.add(_ID);
+            mColumns.add(TIME_CREATED);
+            mColumns.add(LAST_UPDATED);
+            mColumns.add(LAST_SYNC);
+            mColumns.add(OWNER);
+
     }
+    private static LogTable mSingleton;
 
     @Override
     public String getName() {
@@ -44,6 +49,7 @@ class LogTable extends BaseTable<Log> {
         values.put(TIME_CREATED.getKey(), obj.getTimeCreated());
         values.put(LAST_UPDATED.getKey(), obj.getLastUpdated());
         values.put(OWNER.getKey(), obj.getOwner());
+        values.put(LAST_SYNC.getKey(), obj.getLastSynced());
         return values;
     }
 
@@ -53,7 +59,15 @@ class LogTable extends BaseTable<Log> {
         Long timeCreated = (Long) extract(TIME_CREATED, cursor);
         Long lastUpdated = (Long) extract(LAST_UPDATED, cursor);
         String owner = (String) extract(OWNER, cursor);
+        Long lastSynced = (Long) extract(LAST_SYNC, cursor);
+        return new Log(id, timeCreated, lastUpdated, owner, lastSynced);
+    }
 
-        return new Log(id, timeCreated, lastUpdated, owner);
+    public static LogTable getSingleton() {
+        if (mSingleton == null) {
+            mSingleton = new LogTable();
+        }
+
+        return mSingleton;
     }
 }

@@ -37,12 +37,14 @@ public abstract class BaseTable<AssociatedClass> {
 	public abstract AssociatedClass deserialize(Cursor cursor);
 	
 	private List<Column> immutableColumns = null;
+    private List<String> columnNames = null;
+    private String [] columnNamesArray = null;
 	private Map<String, Integer> columnMap;
 	
-	public BaseTable() {
+	protected BaseTable() {
 		this.columnMap = getColumnMapping();
 	}
-	
+
 	/**
 	 * 
 	 * @return A SQL statement, which can be used to generate this table;
@@ -50,6 +52,10 @@ public abstract class BaseTable<AssociatedClass> {
 	public final String sqlCreateTable() {
 		return new SqlCreateTableGenerator(getName(), getColumns()).build();
 	}
+
+    public final String sqlDeleteTable() {
+        return "DROP TABLE IF EXISTS " + getName();
+    }
 	
 	/**
 	 * 
@@ -63,7 +69,30 @@ public abstract class BaseTable<AssociatedClass> {
 		
 		return immutableColumns;
 	}
-	
+
+    public List<String> getColumnNames() {
+        if (columnNames == null) {
+            final List<Column> columns = getColumns();
+            columnNames = new ArrayList<String>();
+            for (Column column : getColumns()) {
+                columnNames.add(column.getKey());
+            }
+
+            columnNamesArray = new String[columnNames.size()];
+            columnNames.toArray(columnNamesArray);
+        }
+
+        return columnNames;
+    }
+
+    public String [] getColumnNamesArray() {
+        if (columnNamesArray == null) {
+            getColumnNames();
+        }
+
+        return columnNamesArray;
+    }
+
 	private Map<String, Integer> getColumnMapping() {
 		HashMap<String, Integer> columnMapping = new HashMap<String, Integer>();
 		int i = 0;
