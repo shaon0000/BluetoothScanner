@@ -1,5 +1,7 @@
 package com.scanner.bth.bluetoothscanner;
 
+import java.util.UUID;
+
 /**
  * We use this to parse the advertisement ID and pull up the right data. This in conjunction with
  * some filter mechanism can be used to look for the right devices.
@@ -8,6 +10,73 @@ package com.scanner.bth.bluetoothscanner;
  */
 public class BeaconParser {
 
+    public enum ByteType {
+        AD_SIZE("AD Size"),
+        AD_TYPE("AD Type"),
+        AD_VALUE("AD Value"),
+        DATA_SIZE("Data Size"),
+        SPECIFIC("Specific"),
+        COMPANY_ID("Company ID"),
+        BLE_TYPE("BLE Type"),
+        BEACON_SIZE("Beacon Size"),
+        UUID("UUID"),
+        MAJOR("Major"),
+        MINOR("Minor"),
+        TX_POWER("TX power"),
+        NA("N/A");
+
+        private String type;
+
+        ByteType(String type) {
+            this.type = type;
+        }
+
+        public String getType() {
+            return type;
+        }
+    }
+
+    private static ByteType[] typeMap = {
+        ByteType.AD_SIZE,
+        ByteType.AD_TYPE,
+            ByteType.AD_VALUE,
+            ByteType.DATA_SIZE,
+            ByteType.SPECIFIC,
+            ByteType.COMPANY_ID,
+            ByteType.COMPANY_ID,
+            ByteType.BLE_TYPE,
+            ByteType.BEACON_SIZE,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.UUID,
+            ByteType.MAJOR,
+            ByteType.MAJOR,
+            ByteType.MINOR,
+            ByteType.MINOR,
+            ByteType.TX_POWER,
+            ByteType.NA
+    };
+
+    public static ByteType getByteTypeForIndex(int index) {
+        if (index < typeMap.length) {
+            return typeMap[index];
+        } else {
+            return ByteType.NA;
+        }
+    }
 
     public static class BeaconData {
 
@@ -44,6 +113,15 @@ public class BeaconParser {
 
         public String getTx() {
             return tx;
+        }
+
+        public int hashCode() {
+            return (beacon_prefix + proximity_uuid).hashCode();
+        }
+
+        public boolean equals(Object other) {
+            BeaconData data = (BeaconData) other;
+            return (beacon_prefix + proximity_uuid).contentEquals(data.getBeacon_prefix() + data.getProximity_uuid());
         }
     }
 

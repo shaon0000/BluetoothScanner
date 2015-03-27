@@ -19,6 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 
 
 public class MainActivity extends ActionBarActivity implements
@@ -34,6 +35,8 @@ public class MainActivity extends ActionBarActivity implements
 
     private static final String TAG_LIST_FRAGMENT = "bth_list_fragment";
     private static final String TAG_DETAIL_FRAGMENT = "bth_detail_framgment";
+    private MenuItem mStartScanButton;
+    private MenuItem mStopScanButton;
 
     @Override
     public void onFragmentInteraction(Uri uri) {
@@ -62,6 +65,16 @@ public class MainActivity extends ActionBarActivity implements
         public ScanRecord getRecord() {
             return record;
         }
+
+        @Override
+        public int hashCode() {
+            return parsedData.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return parsedData.equals(((BthScanResult) other).getBeaconData());
+        }
     }
     public BthScanModel.BthScanView mScanListener = new BthScanModel.BthScanView() {
 
@@ -89,6 +102,7 @@ public class MainActivity extends ActionBarActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
 
         FragmentManager fm = getSupportFragmentManager();
@@ -128,6 +142,9 @@ public class MainActivity extends ActionBarActivity implements
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        mStartScanButton = menu.findItem(R.id.action_search);
+        mStopScanButton = menu.findItem(R.id.action_stop_search);
+        mStopScanButton.setVisible(false);
         return true;
     }
 
@@ -147,6 +164,18 @@ public class MainActivity extends ActionBarActivity implements
             case R.id.action_search: {
                 Log.d("ACTION SCAN", "scan clicked in action bar");
                 mScanModel.scanLeDevice(true);
+                mStartScanButton.setVisible(false);
+                mStopScanButton.setVisible(true);
+                setSupportProgressBarIndeterminateVisibility(true);
+                return true;
+            }
+
+            case R.id.action_stop_search: {
+                Log.d("ACTION SCAN", "stop clicked in action bar");
+                mScanModel.scanLeDevice(false);
+                mStartScanButton.setVisible(true);
+                mStopScanButton.setVisible(false);
+                setSupportProgressBarIndeterminateVisibility(false);
                 return true;
             }
         }
@@ -162,7 +191,8 @@ public class MainActivity extends ActionBarActivity implements
                 result.getBeaconData().getProximity_uuid(),
                 result.getBeaconData().getMajor(),
                 result.getBeaconData().getMinor(),
-                result.getBeaconData().getTx());
+                result.getBeaconData().getTx(),
+                result.getRecord().getBytes());
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, detailFragment)
                         // Add this transaction to the back stack

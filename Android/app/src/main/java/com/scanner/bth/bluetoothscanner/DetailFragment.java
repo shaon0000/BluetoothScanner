@@ -1,12 +1,16 @@
 package com.scanner.bth.bluetoothscanner;
 
 import android.app.Activity;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.TextView;
 
 
@@ -26,21 +30,25 @@ public class DetailFragment extends Fragment {
     private static final String MAJOR = "major";
     private static final String MINOR = "minor";
     private static final String TX = "tx";
+    private static final String SCAN_RECORD = "scan_record";
 
     private String beaconPrefix;
     private String proximityUUUID;
     private String major;
     private String minor;
     private String tx;
+    private byte[] scanRecord;
 
     private OnFragmentInteractionListener mListener;
+    private ScanRecordAdapter mScanRecordAdapter;
 
     public static DetailFragment newInstance(
             String beaconPrefix,
             String proximityUUUID,
             String major,
             String minor,
-            String tx) {
+            String tx,
+            byte[] scanRecord) {
         DetailFragment fragment = new DetailFragment();
         Bundle args = new Bundle();
         args.putString(BEACON_PREFIX, beaconPrefix);
@@ -48,7 +56,7 @@ public class DetailFragment extends Fragment {
         args.putString(MAJOR, major);
         args.putString(MINOR, minor);
         args.putString(TX, tx);
-
+        args.putByteArray(SCAN_RECORD, scanRecord);
         fragment.setArguments(args);
         return fragment;
     }
@@ -60,13 +68,19 @@ public class DetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+
         if (getArguments() != null) {
             beaconPrefix = getArguments().getString(BEACON_PREFIX);
             proximityUUUID = getArguments().getString(PROXIMITY_UUID);
             major = getArguments().getString(MAJOR);
             minor = getArguments().getString(MINOR);
             tx = getArguments().getString(TX);
+            scanRecord = getArguments().getByteArray(SCAN_RECORD);
         }
+
+        mScanRecordAdapter = new ScanRecordAdapter(scanRecord, getActivity());
+
     }
 
     @Override
@@ -80,6 +94,9 @@ public class DetailFragment extends Fragment {
         TextView prefixText = (TextView) rootView.findViewById(R.id.detail_layout_beacon_prefix);
         TextView uuidText = (TextView) rootView.findViewById(R.id.detail_layout_uuid);
         TextView txText = (TextView) rootView.findViewById(R.id.detail_layout_tx);
+        GridView scanRecordGrid = (GridView) rootView.findViewById(R.id.bth_detail_scan_record);
+
+        scanRecordGrid.setAdapter(mScanRecordAdapter);
 
         majorText.setText(major);
         minorText.setText(minor);
@@ -127,6 +144,62 @@ public class DetailFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
+    }
+
+    public class ScanRecordAdapter extends BaseAdapter {
+
+        byte[] items;
+        Context context;
+
+        public ScanRecordAdapter(byte[] items, Context context) {
+            this.items = items;
+            this.context = context;
+        }
+
+        @Override
+        public int getCount() {
+            return items.length;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return items[position];
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View cellView;
+            if (convertView == null) {
+                LayoutInflater inflater = (LayoutInflater) context
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                cellView = inflater.inflate(R.layout.detail_cell, parent, false);
+            } else {
+                cellView = convertView;
+            }
+
+            TextView byteValueView = (TextView) cellView.findViewById(R.id.bth_detail_cell_value);
+            TextView byteTypeView = (TextView) cellView.findViewById(R.id.bth_detail_cell_type);
+            TextView cellIndexView = (TextView) cellView.findViewById(R.id.bth_detail_cell_index);
+            byteValueView.setText(BeaconParser.subBytesToHex(items, position, position));
+            cellIndexView.setText(String.valueOf(position));
+            byteTypeView.setText(BeaconParser.getByteTypeForIndex(position).getType());
+
+            if (position < 9) {
+                cellView.setBackgroundResource(R.color.brigh_orange);
+            } else if (position < 30) {
+                cellView.setBackgroundResource(R.color.light_blue);
+            } else {
+                cellView.setBackgroundResource(R.color.smokey_grey);
+            }
+
+
+            return cellView;
+        }
     }
 
 }

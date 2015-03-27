@@ -76,15 +76,6 @@ public class BthScanModel {
 
     public void scanLeDevice(final boolean enable) {
         if (enable) {
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mScanning = false;
-                    mBluetoothAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
-                    notifyScanFinish();
-                }
-            }, SCAN_PERIOD);
-
             notifyScanStart();
             mScanning = true;
             mBluetoothAdapter.getBluetoothLeScanner().startScan(mLeScanCallback);

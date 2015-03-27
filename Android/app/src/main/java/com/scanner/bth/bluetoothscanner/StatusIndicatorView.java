@@ -1,6 +1,7 @@
 package com.scanner.bth.bluetoothscanner;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -12,6 +13,9 @@ import java.util.HashMap;
  *
  */
 public class StatusIndicatorView extends View {
+
+    public static final String STATUS_ON = "on";
+    public static final String STATUS_OFF = "off";
 
     HashMap<String, Integer> indicatorMap = new HashMap<String, Integer>();
 
@@ -26,9 +30,16 @@ public class StatusIndicatorView extends View {
 
     public StatusIndicatorView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        initMap();
     }
     public StatusIndicatorView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        initMap();
+    }
+
+    public void initMap() {
+        indicatorMap.put(STATUS_ON, Color.GREEN);
+        indicatorMap.put(STATUS_OFF, Color.RED);
     }
 
 

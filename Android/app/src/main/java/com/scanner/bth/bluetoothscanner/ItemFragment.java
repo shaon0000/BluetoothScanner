@@ -24,6 +24,7 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * A fragment representing a list of Items.
@@ -60,21 +61,31 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
     private class LeDeviceListAdapter extends BaseAdapter {
 
-        ArrayList<MainActivity.BthScanResult> bthList = new ArrayList<MainActivity.BthScanResult>();
+        ArrayList<MainActivity.BthScanResult> bthList = new ArrayList<>();
+        HashSet<MainActivity.BthScanResult> bthSet = new HashSet<>();
+
         Context context;
 
         public LeDeviceListAdapter(Context context) {
             super();
             this.context = context;
         }
-        public void addDevice(MainActivity.BthScanResult result) {
+        public boolean addDevice(MainActivity.BthScanResult result) {
+            if (!bthSet.contains(result)) {
+                bthList.add(result);
+                bthSet.add(result);
+                return true;
+            } else {
+                Log.d(LeDeviceListAdapter.class.getSimpleName(), "ignored repeat device:" + result.toString());
+                return false;
+            }
 
-            bthList.add(result);
         }
 
         public void clear() {
 
             bthList.clear();
+            bthSet.clear();
         }
 
         @Override
@@ -100,20 +111,31 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View rowView = inflater.inflate(R.layout.bth_scan_result_list_row, parent, false);
-            TextView textView = (TextView) rowView.findViewById(R.id.bth_scan_result_name);
+            TextView majorView = (TextView) rowView.findViewById(R.id.bth_scan_result_major);
+            TextView minorView = (TextView) rowView.findViewById(R.id.bth_scan_result_minor);
+            TextView uuidView = (TextView) rowView.findViewById(R.id.bth_scan_result_uuid);
+            TextView macView = (TextView) rowView.findViewById(R.id.bth_scan_result_mac_address);
+
             StatusIndicatorView indicatorView = (StatusIndicatorView) rowView.findViewById(R.id.status_indicator);
+
             BluetoothDevice device = bthList.get(position).getDevice();
+            MainActivity.BthScanResult result = bthList.get(position);
             Log.d(LeDeviceListAdapter.class.getSimpleName(), "getting view: " + device.getAddress());
-            textView.setText(device.getAddress());
+            BeaconParser.BeaconData beaconData = result.getBeaconData();
+
+            uuidView.setText(beaconData.getProximity_uuid());
+            majorView.setText(beaconData.getMajor());
+            minorView.setText(beaconData.getMinor());
+            macView.setText(device.getAddress());
 
             return rowView;
         }
     }
 
     public void addDevice(MainActivity.BthScanResult result) {
-        mAdapter.addDevice(result);
-        mAdapter.notifyDataSetChanged();
-
+        if (mAdapter.addDevice(result)) {
+            mAdapter.notifyDataSetChanged();
+        }
     }
     private LeDeviceListAdapter mAdapter;
 
