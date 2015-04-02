@@ -42,9 +42,9 @@ public class DbHelper extends SQLiteOpenHelper {
         LogTable table = LogTable.getSingleton();
         // Select All Query
         String [] columns = table.getColumnNamesArray();
-        String selectQuery = "SELECT  * FROM " + table.getName();
+
         String orderBy = sortBy == null ? null : (sortBy.getKey() + (asc == true ? " ASC" : " DESC"));
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(table.getName(), columns, null, null, null, null, orderBy);
 
         // looping through all rows and adding to list
@@ -57,6 +57,7 @@ public class DbHelper extends SQLiteOpenHelper {
         }
 
         // return contact list
+        db.close();
         return logList;
     }
 
@@ -73,7 +74,7 @@ public class DbHelper extends SQLiteOpenHelper {
         }
 
         Log log = LogTable.getSingleton().deserialize(cursor);
-
+        db.close();
         return log;
     }
 
@@ -86,6 +87,28 @@ public class DbHelper extends SQLiteOpenHelper {
         long rowId = db.insert(table.getName(), null, table.serialize(log));
         db.close();
         return rowId;
+    }
+
+    public List<Location> getAllLocations() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        LocationTable table = LocationTable.getSingleton();
+
+        // Select All Query
+        String [] columns = table.getColumnNamesArray();
+
+        Cursor cursor = db.query(table.getName(), columns, null, null, null, null, null);
+        List<Location> results = new ArrayList<Location>();
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+
+                // Adding contact to list
+                results.add(table.deserialize(cursor));
+            } while (cursor.moveToNext());
+        }
+        db.close();
+        return results;
     }
 
 }
