@@ -32,5 +32,13 @@ public class FlowPickActivity extends Activity {
                 startActivity(intent);
             }
         });
+
+        syncButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(FlowPickActivity.this, LogListActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }

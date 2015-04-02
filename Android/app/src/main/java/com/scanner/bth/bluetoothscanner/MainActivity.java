@@ -51,6 +51,7 @@ public class MainActivity extends ActionBarActivity implements
         public BthScanResult(BluetoothDevice device, ScanRecord record) {
             this.device = device;
             this.record = record;
+
             this.parsedData = BeaconParser.read(record.getBytes());
 
         }
@@ -75,6 +76,14 @@ public class MainActivity extends ActionBarActivity implements
         public boolean equals(Object other) {
             return parsedData.equals(((BthScanResult) other).getBeaconData());
         }
+
+        public void update(BthScanResult result) {
+            // This isn't doing much now, but we might have to use this later on.
+            // TODO (shaon): actually revisit whether this was useful.
+            device = result.device;
+            record = result.record;
+            parsedData = result.parsedData;
+        }
     }
     public BthScanModel.BthScanView mScanListener = new BthScanModel.BthScanView() {
 
@@ -88,8 +97,7 @@ public class MainActivity extends ActionBarActivity implements
         @Override
         public void onScanStart() {
             Log.d("SCAN", "Starting to scan");
-            // clear the list of items. start animation.
-            mScanResultFragment.clear();
+            // update the list everytime we scan.
         }
 
         @Override

@@ -1,11 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:padding="10dp">
     <!---
     - time_created
-    - total_number_of_entries
-    - synced
-    - last_updated
+    - synced: uploaded on in queue symbol
+    - completed: check-mark or X
     -->
+    <TextView
+        android:id="@+id/log_list_item_time_created"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="4/2/2015"/>
+
+    <ImageView
+        android:id="@+id/log_list_item_finished"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="15dp"/>
+
+    <ImageView
+        android:id="@+id/log_list_item_synced"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="15dp"/>
+
+
+
 </LinearLayout>

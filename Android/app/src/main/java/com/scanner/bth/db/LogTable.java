@@ -13,13 +13,14 @@ import java.util.ArrayList;
  *
  * Represents a SQL LogTable that can be used to serialize/deserialize Log objects into SQL objects.
  */
-class LogTable extends BaseTable<Log> {
+public class LogTable extends BaseTable<Log> {
 
     public static final Column _ID = new Column("_id", Column.PRIMARY_INT_KEY);
     public static final Column TIME_CREATED = new Column("time_created", Column.LONG);
     public static final Column OWNER = new Column("owner", Column.STRING);
     public static final Column LAST_UPDATED = new Column("last_updated", Column.LONG);
     public static final Column LAST_SYNC = new Column("last_sync", Column.LONG);
+    public static final Column FINISHED = new Column("finished", Column.BOOLEAN);
 
     private static ArrayList<Column> mColumns = new ArrayList<Column>();
     static {
@@ -29,6 +30,7 @@ class LogTable extends BaseTable<Log> {
             mColumns.add(LAST_UPDATED);
             mColumns.add(LAST_SYNC);
             mColumns.add(OWNER);
+            mColumns.add(FINISHED);
 
     }
     private static LogTable mSingleton;
@@ -50,6 +52,7 @@ class LogTable extends BaseTable<Log> {
         values.put(LAST_UPDATED.getKey(), obj.getLastUpdated());
         values.put(OWNER.getKey(), obj.getOwner());
         values.put(LAST_SYNC.getKey(), obj.getLastSynced());
+        values.put(FINISHED.getKey(), obj.getFinished());
         return values;
     }
 
@@ -60,7 +63,9 @@ class LogTable extends BaseTable<Log> {
         Long lastUpdated = (Long) extract(LAST_UPDATED, cursor);
         String owner = (String) extract(OWNER, cursor);
         Long lastSynced = (Long) extract(LAST_SYNC, cursor);
-        return new Log(id, timeCreated, lastUpdated, owner, lastSynced);
+        Boolean finished = (Boolean) extract(FINISHED, cursor);
+
+        return new Log(id, timeCreated, lastUpdated, owner, lastSynced, finished);
     }
 
     public static LogTable getSingleton() {

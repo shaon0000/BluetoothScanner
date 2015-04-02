@@ -1,8 +1,5 @@
 package com.scanner.bth.db;
 
-/**
- * Created by shaon on 3/19/2015.
- */
 public class Log {
 
     public Integer getId() {
@@ -30,6 +27,16 @@ public class Log {
     private Long lastUpdated;
     private String owner;
     private Long lastSynced;
+    private Boolean finished;
+
+    public Log(Integer id, Long timeCreated, Long last_updated, String owner, Long lastSynced, Boolean finished) {
+        this.id = id;
+        this.timeCreated = timeCreated;
+        this.lastUpdated = last_updated;
+        this.owner = owner;
+        this.lastSynced = lastSynced;
+        this.finished = finished;
+    }
 
     @Override
     public String toString() {
@@ -38,16 +45,12 @@ public class Log {
                 ", timeCreated=" + timeCreated +
                 ", lastUpdated=" + lastUpdated +
                 ", owner='" + owner + '\'' +
-                ", lastSync=" + lastSynced +
+                ", lastSynced=" + lastSynced +
+                ", finished=" + finished +
                 '}';
     }
 
-    public Log(Integer id, Long timeCreated, Long last_updated, String owner, Long lastSynced) {
-        this.id = id;
-        this.timeCreated = timeCreated;
-        this.lastUpdated = last_updated;
-        this.owner = owner;
-        this.lastSynced = lastSynced;
+    public Boolean getFinished() {
+        return finished;
     }
-
 }

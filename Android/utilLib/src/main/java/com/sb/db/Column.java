@@ -89,11 +89,23 @@ public class Column {
         }
     }
 
+    private static class _BooleanKey extends ColumnType<Boolean> {
+        _BooleanKey() {super("INTEGER"); }
+
+        @Override
+        public Boolean extract(Cursor cursor, int pos) {
+            Integer val = cursor.getInt(pos);
+            return val > 0 ? true : false;
+
+        }
+    }
+
     public static final _PrimaryIntKey PRIMARY_INT_KEY = new _PrimaryIntKey();
     public static final _IntKey INTEGER = new _IntKey();
     public static final _StringKey STRING = new _StringKey();
     public static final _DoubleKey DOUBLE = new _DoubleKey();
     public static final _LongKey LONG = new _LongKey();
+    public static final _BooleanKey BOOLEAN = new _BooleanKey();
 
 	private String key;
 	private ColumnType type;

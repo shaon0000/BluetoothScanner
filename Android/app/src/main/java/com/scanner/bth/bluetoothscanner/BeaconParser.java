@@ -1,7 +1,5 @@
 package com.scanner.bth.bluetoothscanner;
 
-import java.util.UUID;
-
 /**
  * We use this to parse the advertisement ID and pull up the right data. This in conjunction with
  * some filter mechanism can be used to look for the right devices.

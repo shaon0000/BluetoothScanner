@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.sb.db.Column;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +15,7 @@ import java.util.List;
  */
 public class DbHelper extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 3;
     public static final String DATABASE_NAME = "FeedReader.db";
 
     public DbHelper(Context context) {
@@ -35,14 +37,15 @@ public class DbHelper extends SQLiteOpenHelper {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    public List<Log> getLogs() {
+    public List<Log> getLogs(Column sortBy, boolean asc) {
         List<Log> logList = new ArrayList<Log>();
         LogTable table = LogTable.getSingleton();
         // Select All Query
+        String [] columns = table.getColumnNamesArray();
         String selectQuery = "SELECT  * FROM " + table.getName();
-
+        String orderBy = sortBy == null ? null : (sortBy.getKey() + (asc == true ? " ASC" : " DESC"));
         SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
+        Cursor cursor = db.query(table.getName(), columns, null, null, null, null, orderBy);
 
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
@@ -76,7 +79,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
     public long createLog(String owner) {
         long now = System.currentTimeMillis();
-        Log log = new Log(0, now, now, owner, 0L);
+        Log log = new Log(0, now, now, owner, 0L, false);
 
         SQLiteDatabase db = this.getWritableDatabase();
         LogTable table = new LogTable();

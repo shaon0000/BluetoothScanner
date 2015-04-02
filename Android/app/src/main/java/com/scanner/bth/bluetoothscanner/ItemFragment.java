@@ -72,10 +72,13 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         }
         public boolean addDevice(MainActivity.BthScanResult result) {
             if (!bthSet.contains(result)) {
+
                 bthList.add(result);
                 bthSet.add(result);
                 return true;
             } else {
+                MainActivity.BthScanResult priorResult = bthList.get(bthList.lastIndexOf(result));
+                priorResult.update(result);
                 Log.d(LeDeviceListAdapter.class.getSimpleName(), "ignored repeat device:" + result.toString());
                 return false;
             }
