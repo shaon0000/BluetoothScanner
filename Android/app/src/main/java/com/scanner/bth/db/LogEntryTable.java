@@ -7,14 +7,15 @@ import com.sb.db.BaseTable;
 import com.sb.db.Column;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class LogEntryTable extends BaseTable<LogEntry> {
     private static LogTable mSingleton;
 
     public static final Column _ID = new Column("_id", Column.PRIMARY_INT_KEY);
 
-    public static final Column LOG_ID = new Column("log_id", Column.INTEGER);
-    public static final Column BYTE_RECORD = new Column("byte_record", Column.STRING);
+    public static final Column LOG_ID = new Column("log_id", Column.UUID).setNotNull();
+    public static final Column BYTE_RECORD = new Column("byte_record", Column.STRING).setNotNull();
 
     public static final Column DEVICE_LAST_CHECKED = new Column("device_last_checked", Column.LONG);
     public static final Column LAST_MOUSE_EVENT = new Column("last_mouse_event", Column.LONG);
@@ -62,7 +63,7 @@ public class LogEntryTable extends BaseTable<LogEntry> {
     public ContentValues serialize(LogEntry obj) {
         ContentValues values = new ContentValues();
 
-        values.put(LOG_ID.getKey(), obj.getLogId());
+        values.put(LOG_ID.getKey(), obj.getLogId().toString());
         values.put(BYTE_RECORD.getKey(), obj.getByteRecord());
 
         values.put(DEVICE_LAST_CHECKED.getKey(), obj.getDeviceLastChecked());
@@ -82,7 +83,7 @@ public class LogEntryTable extends BaseTable<LogEntry> {
     @Override
     public LogEntry deserialize(Cursor cursor) {
         Integer id = (Integer) extract(_ID, cursor);
-        Integer logId = (Integer) extract(LOG_ID, cursor);
+        UUID logId = (UUID) extract(LOG_ID, cursor);
 
 
         String byteRecord = (String) extract(BYTE_RECORD, cursor);

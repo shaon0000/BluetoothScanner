@@ -9,6 +9,8 @@ import android.os.Build;
 import android.os.Handler;
 import android.bluetooth.le.ScanCallback;
 
+import com.scanner.bth.db.LocationDevice;
+
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;

@@ -15,7 +15,10 @@ public class SqlCreateTableGenerator {
 		// We should switch this to something better suited for appending strings.
 		String finalString = "";
 		for (Column column: columns) {
-			finalString += column.toString() + ",";
+			finalString += column.toString()
+                    + (column.isNotNullable() ? " NOT NULL" : "")
+                    + (column.isUnique() ? " UNIQUE" : "")
+                    + ",";
 		}
 		
 		return "CREATE TABLE " 

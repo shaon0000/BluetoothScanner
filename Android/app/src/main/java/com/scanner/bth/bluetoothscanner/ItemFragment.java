@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +23,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+
+import com.scanner.bth.db.LocationDevice;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -70,6 +73,13 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             super();
             this.context = context;
         }
+
+        public void prePopulate(LocationDevice device) {
+            MainActivity.BthScanResult result = new MainActivity.BthScanResult(device);
+            bthList.add(result);
+            bthSet.add(result);
+        }
+
         public boolean addDevice(MainActivity.BthScanResult result) {
             if (!bthSet.contains(result)) {
 
@@ -131,6 +141,18 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             minorView.setText(beaconData.getMinor());
             macView.setText(device.getAddress());
 
+            // Add communication step somewhere here.
+            if (device == null) {
+                indicatorView.setState(MouseIndicatorView.SEARCHING);
+                return rowView;
+            }
+
+            if (beaconData.getMinor().contentEquals("0")) {
+                indicatorView.setState(MouseIndicatorView.NO_MOUSE);
+            } else {
+                indicatorView.setState(MouseIndicatorView.MOUSE_FOUND);
+            }
+
             return rowView;
         }
     }
@@ -140,6 +162,11 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             mAdapter.notifyDataSetChanged();
         }
     }
+
+    public void prePopulate(LocationDevice device) {
+        mAdapter.prePopulate(device);
+    }
+
     private LeDeviceListAdapter mAdapter;
 
     // TODO: Rename and change types of parameters

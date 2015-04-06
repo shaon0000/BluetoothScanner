@@ -25,4 +25,9 @@ public class Location {
     public Integer getDeviceCount() {
         return deviceCount;
     }
+
+    @Override
+    public String toString() {
+        return address + " (" + deviceCount + ")";
+    }
 }

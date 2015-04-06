@@ -1,0 +1,40 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.scanner.bth.bluetoothscanner.FlowPickFragment">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerInParent="true"
+        android:padding="10dp">
+
+        <Button
+            android:id="@+id/flow_pick_new_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="@string/flow_pick_button_new"
+            />
+
+        <Button
+            android:id="@+id/flow_pick_prev_log_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="@string/flow_pick_button_prev_log"/>
+
+        <Button
+            android:id="@+id/flow_pick_sync"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="@string/flow_pick_button_sync"/>
+
+        <Button
+            android:id="@+id/flow_pick_download"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/flow_pick_button_download_devices"/>
+    </LinearLayout>
+</RelativeLayout>

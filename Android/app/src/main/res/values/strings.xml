@@ -14,7 +14,8 @@
     <string name="title_activity_flow_pick">FlowPickActivity</string>
     <string name="flow_pick_button_new">New Log</string>
     <string name="flow_pick_button_prev_log">Previous Logs</string>
-    <string name="flow_pick_button_sync">Sync</string>
+    <string name="flow_pick_button_sync">Upload Logs</string>
+    <string name="flow_pick_button_download_devices">Download Devices</string>
     <string name="title_activity_log_list">LogListActivity</string>
 
 

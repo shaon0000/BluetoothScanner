@@ -21,11 +21,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 
+import com.scanner.bth.db.LocationDevice;
+
 
 public class MainActivity extends ActionBarActivity implements
         ItemFragment.OnFragmentInteractionListener, DetailFragment.OnFragmentInteractionListener {
 
-    public static final String ROW_ID_EXTRA = "com.scanner.bth.bluetoothscanner.MainActivity.ROW_ID_EXTRA";
+    // Used to update information about said device.
+    public static final String LOG_ID_EXTRA = "com.scanner.bth.bluetoothscanner.MainActivity.LOG_ID_EXTRA";
+
+    // Used to grab devices to pre-populate the list
+    public static final String INTENT_EXTRA_LOCATION_ID = "com.scanner.bth.bluetoothscanner.MainActivity.location_id";
 
     private BluetoothAdapter mBluetoothAdapter;
     private BthScanModel mScanModel;
@@ -37,6 +43,8 @@ public class MainActivity extends ActionBarActivity implements
     private static final String TAG_DETAIL_FRAGMENT = "bth_detail_framgment";
     private MenuItem mStartScanButton;
     private MenuItem mStopScanButton;
+    private long mLocationId;
+    private String mLogId;
 
     @Override
     public void onFragmentInteraction(Uri uri) {
@@ -48,6 +56,11 @@ public class MainActivity extends ActionBarActivity implements
         ScanRecord record;
         BeaconParser.BeaconData parsedData;
 
+        public BthScanResult(LocationDevice device) {
+            this.device = null;
+            this.record = null;
+            this.parsedData = BeaconParser.read(device.getUuid());
+        }
         public BthScanResult(BluetoothDevice device, ScanRecord record) {
             this.device = device;
             this.record = record;
@@ -137,6 +150,11 @@ public class MainActivity extends ActionBarActivity implements
 
         mScanModel = new BthScanModel(mBluetoothAdapter);
         mScanModel.attachView(mScanListener);
+
+
+        mLocationId = getIntent().getExtras().getLong(MainActivity.INTENT_EXTRA_LOCATION_ID);
+        mLogId = getIntent().getExtras().getString(MainActivity.LOG_ID_EXTRA);
+
     }
 
     @Override

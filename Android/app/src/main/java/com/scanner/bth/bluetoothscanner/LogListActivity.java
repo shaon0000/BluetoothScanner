@@ -18,7 +18,6 @@ import com.scanner.bth.db.Log;
 import com.scanner.bth.db.LogTable;
 
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -33,7 +32,7 @@ public class LogListActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_list);
         ListView listView = (ListView) findViewById(R.id.activity_log_list_view);
-        List<Log> logs = new DbHelper(this).getLogs(LogTable.TIME_CREATED, false);
+        List<Log> logs = DbHelper.getInstance().getLogs(LogTable.TIME_CREATED, false);
         LogListAdapater adapter = new LogListAdapater(logs, this);
         listView.setAdapter(adapter);
     }
@@ -83,7 +82,7 @@ public class LogListActivity extends ActionBarActivity {
 
         @Override
         public long getItemId(int position) {
-            return logList.get(position).getId();
+            return (long) position;
         }
 
         @Override

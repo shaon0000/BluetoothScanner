@@ -1,9 +1,11 @@
 package com.scanner.bth.db;
 
+import java.util.UUID;
+
 public class LogEntry {
 
     Integer id;
-    Integer logId;
+    UUID logId;
 
     String byteRecord;
     Long deviceLastChecked;
@@ -17,7 +19,7 @@ public class LogEntry {
     Long lastUpdated;
     Long lastSynced;
 
-    public LogEntry(Integer id, Integer logId, String byteRecord, Long deviceLastChecked, Long lastMouseEvent,
+    public LogEntry(Integer id, UUID logId, String byteRecord, Long deviceLastChecked, Long lastMouseEvent,
                     String lastSigner, String currentSigner, Long lastUpdated, Long lastSynced,
                     Long currentDeviceCheckTime, Long timeCreated) {
 
@@ -35,7 +37,7 @@ public class LogEntry {
     }
 
 
-    public Integer getLogId() {
+    public UUID getLogId() {
         return logId;
     }
 
