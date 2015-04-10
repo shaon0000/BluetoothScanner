@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.sb.db.Column;
 import com.scanner.bth.CustomApplication;
 
 import java.util.ArrayList;

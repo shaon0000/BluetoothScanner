@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.scanner.bth.db.DbHelper;
 import com.scanner.bth.db.LogEntry;
@@ -24,27 +25,35 @@ import com.scanner.bth.db.LogEntry;
  * Use the {@link DetailFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class DetailFragment extends Fragment {
+public class DetailFragment extends Fragment implements BthScanResultsModel.BthScanResultsView {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String LOG_ENTRY_ID = "log_id";
     private static final String OWNER = "owner";
+    private static final String POSITION = "position";
+    private static final String DEVICE_NAME = "device_name";
 
     private Integer logEntryId;
     private LogEntry logEntry;
     private String mOwner;
+    private String mDeviceName;
+    private int mPosition;
 
     private OnFragmentInteractionListener mListener;
     Button mFinishButton;
     EditText mMessageField;
     MouseIndicatorView mStatusView;
+    private TextView mDeviceNameView;
+    private TextView mPositionView;
 
     public static DetailFragment newInstance(
-            Integer logEntryId, String owner) {
+            Integer logEntryId, String owner, String deviceName, int position) {
         DetailFragment fragment = new DetailFragment();
         Bundle args = new Bundle();
         args.putInt(LOG_ENTRY_ID, logEntryId);
         args.putString(OWNER, owner);
+        args.putString(DEVICE_NAME, deviceName);
+        args.putInt(POSITION, position);
         fragment.setArguments(args);
         return fragment;
     }
@@ -62,6 +71,8 @@ public class DetailFragment extends Fragment {
             logEntryId = getArguments().getInt(LOG_ENTRY_ID);
             logEntry = DbHelper.getInstance().getLogEntry(logEntryId);
             mOwner = getArguments().getString(OWNER);
+            mDeviceName = getArguments().getString(DEVICE_NAME);
+            mPosition = getArguments().getInt(POSITION);
         }
 
     }
@@ -73,6 +84,11 @@ public class DetailFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
         mFinishButton = (Button) rootView.findViewById(R.id.fragment_detail_finish_button);
         mMessageField = (EditText) rootView.findViewById(R.id.fragment_detail_message);
+        mDeviceNameView = (TextView) rootView.findViewById(R.id.fragment_detail_device_name);
+        mPositionView = (TextView) rootView.findViewById(R.id.fragment_detail_index);
+
+        mDeviceNameView.setText(mDeviceName);
+        mPositionView.setText(String.valueOf(mPosition));
         mMessageField.setText(logEntry.getMessage());
 
         mStatusView = (MouseIndicatorView) rootView.findViewById(R.id.fragment_detail_status_indicator);
@@ -98,16 +114,39 @@ public class DetailFragment extends Fragment {
         super.onAttach(activity);
         try {
             mListener = (OnFragmentInteractionListener) activity;
+            mListener.getBthScanResultsModel().attachView(this);
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+
+
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void updateView() {
+
+    }
+
+    @Override
+    public void updateSingleItem(BthScanResultsModel.ScanResult result) {
+
+    }
+
+    @Override
+    public void onPreCommunication(BthScanResultsModel.ScanResult result) {
+
+    }
+
+    @Override
+    public void onPostCommunication(BthScanResultsModel.ScanResult result) {
+
     }
 
     /**
@@ -125,6 +164,7 @@ public class DetailFragment extends Fragment {
         public void onFragmentInteraction(Uri uri);
         public void finishEntry(Integer logEntryId);
         public BluetoothDevice getDeviceForEntry(LogEntry entry);
+        public BthScanResultsModel getBthScanResultsModel();
     }
 
     public class ConfirmTask extends AsyncTask<Void, Void, Void> {

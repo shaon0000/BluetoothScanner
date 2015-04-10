@@ -3,9 +3,6 @@ package com.scanner.bth.db;
 import android.content.ContentValues;
 import android.database.Cursor;
 
-import com.sb.db.BaseTable;
-import com.sb.db.Column;
-
 import java.util.ArrayList;
 import java.util.UUID;
 

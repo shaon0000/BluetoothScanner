@@ -23,7 +23,6 @@ public class Comm {
         log.setLastMouseEvent(0L);
         log.setLastSigner("jrobert@company.com");
         log.setDeviceLastChecked(0L);
-        log.setCurrentDeviceCheckTime(now);
     }
 
     public static void sign(LogEntry log, BluetoothDevice device, String owner) {

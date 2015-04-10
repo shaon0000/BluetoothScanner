@@ -3,8 +3,6 @@ package com.scanner.bth.bluetoothscanner;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.le.ScanRecord;
-import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -52,6 +50,8 @@ public class ScannerActivity extends ActionBarActivity implements
     private long mLocationId;
     private String mLogId;
     com.scanner.bth.db.Log mLog;
+    private BthScanResultsModel mScanResultModel;
+
     @Override
     public void onFragmentInteraction(Uri uri) {
 
@@ -67,90 +67,18 @@ public class ScannerActivity extends ActionBarActivity implements
         return null;
     }
 
-    public static class BthScanResult {
-        LocationDevice locationDevice;
-        BluetoothDevice device;
-        ScanRecord record;
-        BeaconParser.BeaconData parsedData;
-
-        public boolean isCommunicating() {
-            return communicating;
-        }
-
-        public void setCommunicating(boolean communicating) {
-            this.communicating = communicating;
-        }
-
-        boolean communicating = false;
-        public LocationDevice getLocationDevice() {
-            return locationDevice;
-        }
-
-        LogEntry logEntry;
-
-        public BthScanResult(LogEntry entry, LocationDevice locationDevice) {
-            this.device = null;
-            this.record = null;
-            String fullRecord = entry.getByteRecord();
-            this.parsedData = BeaconParser.read(fullRecord);
-            this.locationDevice = locationDevice;
-            logEntry = entry;
-            Log.d("blah", "tag");
-        }
-
-        public BthScanResult(BluetoothDevice device, ScanRecord record) {
-            this.device = device;
-            this.record = record;
-
-            this.parsedData = BeaconParser.read(record.getBytes());
-
-        }
-
-        public BluetoothDevice getDevice() {
-            return device;
-        }
-
-        public BeaconParser.BeaconData getBeaconData() {
-            return parsedData;
-        }
-        public ScanRecord getRecord() {
-            return record;
-        }
-
-        @Override
-        public int hashCode() {
-            return parsedData.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return parsedData.equals(((BthScanResult) other).getBeaconData());
-        }
-
-        public void update(BthScanResult result) {
-            device = result.device;
-            record = result.record;
-            parsedData = result.parsedData;
-
-            long now = System.currentTimeMillis();
-            logEntry.setByteRecord(BeaconParser.bytesToHex(result.getRecord().getBytes()));
-            logEntry.setLastUpdated(now);
-        }
-
-        public LogEntry getlogEntry() {
-            return logEntry;
-        }
-
-        public void setlogEntry(LogEntry logEntry) {
-            this.logEntry = logEntry;
-        }
+    @Override
+    public BthScanResultsModel getBthScanResultsModel() {
+        return mScanResultModel;
     }
+
+
     public BthScanModel.BthScanView mScanListener = new BthScanModel.BthScanView() {
 
         @Override
-        public void onLeScan(ScanResult result) {
+        public void onLeScan(android.bluetooth.le.ScanResult result) {
             Log.d("SCAN", "Found an item");
-            BthScanResult scanResult = new BthScanResult(result.getDevice(), result.getScanRecord());
+            BthScanResultsModel.ScanResult scanResult = new BthScanResultsModel.ScanResult(result.getDevice(), result.getScanRecord());
             mScanResultFragment.addDevice(scanResult);
         }
 
@@ -197,6 +125,7 @@ public class ScannerActivity extends ActionBarActivity implements
 
         mScanModel = new BthScanModel(mBluetoothAdapter);
         mScanModel.attachView(mScanListener);
+        mScanResultModel = new BthScanResultsModel();
 
 
 
@@ -276,13 +205,13 @@ public class ScannerActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onClickDevice(BthScanResult result) {
+    public void onClickDevice(BthScanResultsModel.ScanResult result) {
 
-        if (result.isCommunicating() || result.getlogEntry().getCurrentDeviceCheckTime() == 0) {
+        if (result.isCommunicating()) {
             return;
         }
 
-        DetailFragment detailFragment = DetailFragment.newInstance(result.getlogEntry().getId(), "test");
+        DetailFragment detailFragment = DetailFragment.newInstance(result.getlogEntry().getId(), "test", result.getLocationDevice().getName(), 0);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, detailFragment)
                         // Add this transaction to the back stack
