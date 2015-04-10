@@ -26,10 +26,25 @@ public class Log {
 
     public UUID getUuid() { return uuid; }
 
+
     private UUID uuid;
     private Long timeCreated;
     private Long lastUpdated;
     private String owner;
+
+    public void setLastSynced(Long lastSynced) {
+        this.lastSynced = lastSynced;
+    }
+
+    // Only from DB classes can we change this.
+    void setLastUpdated(Long lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public void setFinished(Boolean finished) {
+        this.finished = finished;
+    }
+
     private Long lastSynced;
     private Boolean finished;
 

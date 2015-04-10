@@ -135,17 +135,17 @@ public class FlowPickFragment extends Fragment {
     }
 
     public void lockUi() {
-        mDownloadButton.setClickable(false);
-        mNewButton.setClickable(false);
-        mPrevButton.setClickable(false);
-        mSyncButton.setClickable(false);
+        mDownloadButton.setEnabled(false);
+        mNewButton.setEnabled(false);
+        mPrevButton.setEnabled(false);
+        mSyncButton.setEnabled(false);
     }
 
     public void unlockUi() {
-        mDownloadButton.setClickable(true);
-        mNewButton.setClickable(true);
-        mPrevButton.setClickable(true);
-        mSyncButton.setClickable(true);
+        mDownloadButton.setEnabled(true);
+        mNewButton.setEnabled(true);
+        mPrevButton.setEnabled(true);
+        mSyncButton.setEnabled(true);
     }
 
     /**

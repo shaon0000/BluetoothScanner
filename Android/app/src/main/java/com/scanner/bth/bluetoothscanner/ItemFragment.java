@@ -1,14 +1,9 @@
 package com.scanner.bth.bluetoothscanner;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
-import android.bluetooth.le.ScanRecord;
-import android.bluetooth.le.ScanResult;
 import android.content.Context;
-import android.content.Intent;
-import android.database.DataSetObserver;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -16,15 +11,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.Adapter;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
+import com.scanner.bth.db.DbHelper;
 import com.scanner.bth.db.LocationDevice;
+import com.scanner.bth.db.LogEntry;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -46,16 +40,16 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     private OnFragmentInteractionListener mListener;
 
     /**
      * The fragment's ListView/GridView.
      */
     private AbsListView mListView;
+
+    public void reloadFromDb(Integer logEntryId) {
+        mAdapter.reloadFromDb(logEntryId);
+    }
 
     /**
      * The Adapter which will be used to populate the ListView/GridView with
@@ -64,8 +58,8 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
     private class LeDeviceListAdapter extends BaseAdapter {
 
-        ArrayList<MainActivity.BthScanResult> bthList = new ArrayList<>();
-        HashSet<MainActivity.BthScanResult> bthSet = new HashSet<>();
+        ArrayList<ScannerActivity.BthScanResult> bthList = new ArrayList<>();
+        HashSet<ScannerActivity.BthScanResult> bthSet = new HashSet<>();
 
         Context context;
 
@@ -74,25 +68,42 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             this.context = context;
         }
 
-        public void prePopulate(LocationDevice device) {
-            MainActivity.BthScanResult result = new MainActivity.BthScanResult(device);
+        public void prePopulate(LogEntry entry, LocationDevice device) {
+            ScannerActivity.BthScanResult result = new ScannerActivity.BthScanResult(entry, device);
+            if (bthSet.contains(result)) {
+                return;
+            }
             bthList.add(result);
             bthSet.add(result);
         }
 
-        public boolean addDevice(MainActivity.BthScanResult result) {
+        public boolean addDevice(ScannerActivity.BthScanResult result) {
             if (!bthSet.contains(result)) {
-
-                bthList.add(result);
-                bthSet.add(result);
-                return true;
-            } else {
-                MainActivity.BthScanResult priorResult = bthList.get(bthList.lastIndexOf(result));
-                priorResult.update(result);
-                Log.d(LeDeviceListAdapter.class.getSimpleName(), "ignored repeat device:" + result.toString());
+                Log.d(LeDeviceListAdapter.class.getSimpleName(), "ignoring device not on list" + result.toString());
                 return false;
+            } else {
+
+                ScannerActivity.BthScanResult priorResult = bthList.get(bthList.lastIndexOf(result));
+                priorResult.update(result);
+                DbHelper.getInstance().updateLogEntry(priorResult.getlogEntry());
+                Log.d(LeDeviceListAdapter.class.getSimpleName(), "used data to update:" + result.toString());
+                Log.d(LeDeviceListAdapter.class.getSimpleName(), "communicating with: " + priorResult.toString());
+
+                priorResult.setCommunicating(true);
+                new CommTask(priorResult).execute();
+                return true;
             }
 
+        }
+
+        public void reloadFromDb(Integer logEntryId) {
+            for (ScannerActivity.BthScanResult result : bthList) {
+                if (result.getlogEntry().getId() == logEntryId) {
+                    result.setlogEntry(DbHelper.getInstance().getLogEntry(logEntryId));
+                    notifyDataSetChanged();
+                    break;
+                }
+            }
         }
 
         public void clear() {
@@ -124,30 +135,28 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View rowView = inflater.inflate(R.layout.bth_scan_result_list_row, parent, false);
-            TextView majorView = (TextView) rowView.findViewById(R.id.bth_scan_result_major);
-            TextView minorView = (TextView) rowView.findViewById(R.id.bth_scan_result_minor);
             TextView uuidView = (TextView) rowView.findViewById(R.id.bth_scan_result_uuid);
-            TextView macView = (TextView) rowView.findViewById(R.id.bth_scan_result_mac_address);
 
             StatusIndicatorView indicatorView = (StatusIndicatorView) rowView.findViewById(R.id.status_indicator);
 
             BluetoothDevice device = bthList.get(position).getDevice();
-            MainActivity.BthScanResult result = bthList.get(position);
-            Log.d(LeDeviceListAdapter.class.getSimpleName(), "getting view: " + device.getAddress());
-            BeaconParser.BeaconData beaconData = result.getBeaconData();
+            ScannerActivity.BthScanResult result = bthList.get(position);
 
-            uuidView.setText(beaconData.getProximity_uuid());
-            majorView.setText(beaconData.getMajor());
-            minorView.setText(beaconData.getMinor());
-            macView.setText(device.getAddress());
-
-            // Add communication step somewhere here.
-            if (device == null) {
-                indicatorView.setState(MouseIndicatorView.SEARCHING);
-                return rowView;
+            if (device != null) {
+                Log.d(LeDeviceListAdapter.class.getSimpleName(), "getting view: " + device.getAddress());
             }
 
-            if (beaconData.getMinor().contentEquals("0")) {
+            BeaconParser.BeaconData beaconData = result.getBeaconData();
+
+            uuidView.setText(result.getLocationDevice().getName());
+
+
+            if (result.getlogEntry().getCurrentDeviceCheckTime() == 0 && device == null) {
+                // We never made shook hands with the device before, and we currently don't have a device.
+                indicatorView.setState(MouseIndicatorView.SEARCHING);
+            } else if (result.isCommunicating()) {
+                indicatorView.setState(MouseIndicatorView.COMM);
+            } else if (beaconData.getMinor().contentEquals("0")) {
                 indicatorView.setState(MouseIndicatorView.NO_MOUSE);
             } else {
                 indicatorView.setState(MouseIndicatorView.MOUSE_FOUND);
@@ -157,14 +166,15 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         }
     }
 
-    public void addDevice(MainActivity.BthScanResult result) {
+    public void addDevice(ScannerActivity.BthScanResult result) {
         if (mAdapter.addDevice(result)) {
             mAdapter.notifyDataSetChanged();
+
         }
     }
 
-    public void prePopulate(LocationDevice device) {
-        mAdapter.prePopulate(device);
+    public void prePopulate(LogEntry entry, LocationDevice device) {
+        mAdapter.prePopulate(entry, device);
     }
 
     private LeDeviceListAdapter mAdapter;
@@ -197,11 +207,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
 
         // TODO: Change Adapter to display your content
         mAdapter = new LeDeviceListAdapter(getActivity());
@@ -243,7 +248,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (null != mListener) {
-            mListener.onClickDevice((MainActivity.BthScanResult) mAdapter.getItem(position));
+            mListener.onClickDevice((ScannerActivity.BthScanResult) mAdapter.getItem(position));
         }
     }
 
@@ -272,7 +277,27 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        public void onClickDevice(MainActivity.BthScanResult result);
+        public void onClickDevice(ScannerActivity.BthScanResult result);
+    }
+
+    public class CommTask extends AsyncTask<Void, Void, Void> {
+        private final ScannerActivity.BthScanResult scannedObject;
+
+        public CommTask(ScannerActivity.BthScanResult scannedObject) {
+            this.scannedObject = scannedObject;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            Comm.initExchange(scannedObject.getlogEntry(), scannedObject.getDevice());
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            scannedObject.setCommunicating(false);
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
 }

@@ -1,6 +1,7 @@
 package com.scanner.bth.bluetoothscanner;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -32,9 +34,19 @@ public class LogListActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_list);
         ListView listView = (ListView) findViewById(R.id.activity_log_list_view);
-        List<Log> logs = DbHelper.getInstance().getLogs(LogTable.TIME_CREATED, false);
+        final List<Log> logs = DbHelper.getInstance().getLogs(LogTable.TIME_CREATED, false);
         LogListAdapater adapter = new LogListAdapater(logs, this);
         listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(LogListActivity.this, ScannerActivity.class);
+                intent.putExtra(ScannerActivity.LOG_ID_EXTRA, logs.get(position).getUuid().toString());
+                startActivity(intent);
+            }
+        });
     }
 
 

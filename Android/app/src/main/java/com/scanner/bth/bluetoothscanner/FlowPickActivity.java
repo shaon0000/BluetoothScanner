@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.scanner.bth.db.DbHelper;
 import com.scanner.bth.db.Location;
+import com.scanner.bth.db.LocationDevice;
 import com.scanner.bth.update.DbUpdater;
 import java.util.List;
 import java.util.UUID;
@@ -37,6 +38,7 @@ public class FlowPickActivity extends Activity implements FlowPickFragment.OnFra
             getFragmentManager().beginTransaction()
                     .add(R.id.activity_flow_pick_container, mFlowPickFragment, FLOW_PICK_FRAGMENT)
                     .commit();
+
         }
     }
 
@@ -52,9 +54,7 @@ public class FlowPickActivity extends Activity implements FlowPickFragment.OnFra
 
     @Override
     public void onNewLogButtonClick() {
-        UUID logUUID = DbHelper.getInstance().createLog("test", 0L);
-        packagedIntent = new Intent(FlowPickActivity.this, MainActivity.class);
-        packagedIntent.putExtra(MainActivity.LOG_ID_EXTRA, logUUID.toString());
+        packagedIntent = new Intent(FlowPickActivity.this, ScannerActivity.class);
         LocationFragment locationFragment = LocationFragment.newInstance();
         getFragmentManager().beginTransaction()
                 .replace(R.id.activity_flow_pick_container, locationFragment)
@@ -71,12 +71,19 @@ public class FlowPickActivity extends Activity implements FlowPickFragment.OnFra
     @Override
     public void onOldLogButtonClick() {
         packagedIntent = new Intent(FlowPickActivity.this, LogListActivity.class);
-        //startActivity(packagedIntent);
+        startActivity(packagedIntent);
     }
 
     @Override
     public void onLocationPicked(Location location) {
-        packagedIntent.putExtra(MainActivity.INTENT_EXTRA_LOCATION_ID, location.getLocationId());
+        UUID logUUID = DbHelper.getInstance().createLog("test", location.getLocationId());
+
+        List<LocationDevice> devices = DbHelper.getInstance().getLocalLocationDevices(location);
+
+        for (LocationDevice device: devices) {
+            DbHelper.getInstance().createLogEntry(logUUID, "02011a1aff4c000215" + device.getUuid() + "0000" + "0000" + "00");
+        }
+        packagedIntent.putExtra(ScannerActivity.LOG_ID_EXTRA, logUUID.toString());
         startActivity(packagedIntent);
     }
 

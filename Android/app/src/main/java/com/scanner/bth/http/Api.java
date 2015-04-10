@@ -19,7 +19,7 @@ public class Api {
         fakeLocations.add(new Location(3L, "567 C St", 0));
         devicesPerLocation.put(fakeLocations.get(0), new ArrayList<LocationDevice>());
         devicesPerLocation.get(fakeLocations.get(0)).add(
-                new LocationDevice("12345667890123456789007643213456", 1L));
+                new LocationDevice("12345667890123456789007643213456", 1L, "south-west corner"));
 
     }
 

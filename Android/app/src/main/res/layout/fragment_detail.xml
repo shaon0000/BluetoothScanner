@@ -5,93 +5,107 @@
     android:layout_gravity="top"
     android:padding="10dp"
     tools:context="com.scanner.bth.bluetoothscanner.DetailFragment">
-    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:text="@string/hello_blank_fragment" />
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="beacon prefix: "/>
-        <TextView
-            android:id="@+id/detail_layout_beacon_prefix"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="none"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="uuid: "/>
-        <TextView
-        android:id="@+id/detail_layout_uuid"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="major: "/>
-        <TextView
-            android:id="@+id/detail_layout_major"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="minor: "/>
-        <TextView
-        android:id="@+id/detail_layout_minor"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        >
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="tx: "/>
-        <TextView
-            android:id="@+id/detail_layout_tx"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-
-    <GridView
-        android:id="@+id/bth_detail_scan_record"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="2dp"
-        android:columnWidth="45dp"
-        android:numColumns="auto_fit"
-        android:verticalSpacing="2dp"
-        android:horizontalSpacing="2dp"
-        android:stretchMode="columnWidth"
-        android:gravity="center"></GridView>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <com.scanner.bth.bluetoothscanner.MouseIndicatorView
+            android:id="@+id/fragment_detail_status_indicator"
+            android:layout_width="50dp"
+            android:layout_height="50dp" />
+        <View
+            android:layout_width="1dp"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom"
+            android:background="@color/light_blue"/>
+
+        <TextView
+            android:id="@+id/fragment_detail_index"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="3"
+            android:gravity="center"/>
+        <View
+            android:layout_width="1dp"
+            android:layout_height="50dp"
+            android:layout_gravity="bottom"
+            android:background="@color/light_blue"/>
+        <TextView
+            android:id="@+id/fragment_detail_device_name"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="South-west corner"
+            android:textStyle="bold"
+            android:typeface="monospace"
+            android:textSize="15dp"
+            android:gravity="center"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_marginBottom="5dp"
+        android:background="@color/light_blue"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="device last checked: "/>
+        <TextView
+            android:id="@+id/detail_fragment_device_last_checked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="June 12, 2014, 5:19 pm"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="5dp"
+        android:background="@color/light_blue"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="mouse last found: "/>
+        <TextView
+            android:id="@+id/detail_fragment_mouse_last_found"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="June 12, 2014, 5:19 pm"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="5dp"
+        android:background="@color/light_blue"/>
+
+    <EditText
+        android:id="@+id/fragment_detail_message"
+        android:layout_width="fill_parent"
+        android:layout_height="200dp"
+        android:layout_margin="15dp"
+        android:hint="Enter report coment here..."
+        android:inputType="textMultiLine"/>
+    <Button
+        android:id="@+id/fragment_detail_finish_button"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:text="Enter"/>
+
 </LinearLayout>

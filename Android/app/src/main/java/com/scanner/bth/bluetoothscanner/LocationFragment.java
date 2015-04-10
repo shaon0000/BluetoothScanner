@@ -4,16 +4,12 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.app.ListFragment;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-
-import com.scanner.bth.bluetoothscanner.dummy.DummyContent;
 import com.scanner.bth.db.DbHelper;
 import com.scanner.bth.db.Location;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**

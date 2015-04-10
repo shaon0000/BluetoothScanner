@@ -15,12 +15,14 @@ public class LocationDeviceTable extends BaseTable<LocationDevice> {
 
     public static final Column UUID = new Column("uuid", Column.STRING);
     public static final Column LOCATION_ID = new Column ("location_id", Column.LONG);
+    public static final Column NAME = new Column("name", Column.STRING);
 
     private static final ArrayList<Column> mColumns = new ArrayList<>();
 
     static {
         mColumns.add(UUID);
         mColumns.add(LOCATION_ID);
+        mColumns.add(NAME);
     }
 
     private static LocationDeviceTable mSingleton;
@@ -40,6 +42,7 @@ public class LocationDeviceTable extends BaseTable<LocationDevice> {
         ContentValues values = new ContentValues();
         values.put(UUID.getKey(), obj.getUuid());
         values.put(LOCATION_ID.getKey(), obj.getLocationId());
+        values.put(NAME.getKey(), obj.getName());
         return values;
     }
 
@@ -47,7 +50,9 @@ public class LocationDeviceTable extends BaseTable<LocationDevice> {
     public LocationDevice deserialize(Cursor cursor) {
         String uuid = (String) extract(UUID, cursor);
         Long locationId = (Long) extract(LOCATION_ID, cursor);
-        return new LocationDevice(uuid, locationId);
+        String name = (String) extract(NAME, cursor);
+
+        return new LocationDevice(uuid, locationId, name);
     }
 
 

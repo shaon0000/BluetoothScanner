@@ -1,17 +1,19 @@
 package com.scanner.bth.bluetoothscanner;
 
 import android.app.Activity;
-import android.content.Context;
+import android.bluetooth.BluetoothDevice;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.GridView;
-import android.widget.TextView;
+import android.widget.Button;
+import android.widget.EditText;
+
+import com.scanner.bth.db.DbHelper;
+import com.scanner.bth.db.LogEntry;
 
 
 /**
@@ -25,38 +27,24 @@ import android.widget.TextView;
 public class DetailFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String BEACON_PREFIX = "beacon_prefix";
-    private static final String PROXIMITY_UUID = "proximity_uuid";
-    private static final String MAJOR = "major";
-    private static final String MINOR = "minor";
-    private static final String TX = "tx";
-    private static final String SCAN_RECORD = "scan_record";
+    private static final String LOG_ENTRY_ID = "log_id";
+    private static final String OWNER = "owner";
 
-    private String beaconPrefix;
-    private String proximityUUUID;
-    private String major;
-    private String minor;
-    private String tx;
-    private byte[] scanRecord;
+    private Integer logEntryId;
+    private LogEntry logEntry;
+    private String mOwner;
 
     private OnFragmentInteractionListener mListener;
-    private ScanRecordAdapter mScanRecordAdapter;
+    Button mFinishButton;
+    EditText mMessageField;
+    MouseIndicatorView mStatusView;
 
     public static DetailFragment newInstance(
-            String beaconPrefix,
-            String proximityUUUID,
-            String major,
-            String minor,
-            String tx,
-            byte[] scanRecord) {
+            Integer logEntryId, String owner) {
         DetailFragment fragment = new DetailFragment();
         Bundle args = new Bundle();
-        args.putString(BEACON_PREFIX, beaconPrefix);
-        args.putString(PROXIMITY_UUID, proximityUUUID);
-        args.putString(MAJOR, major);
-        args.putString(MINOR, minor);
-        args.putString(TX, tx);
-        args.putByteArray(SCAN_RECORD, scanRecord);
+        args.putInt(LOG_ENTRY_ID, logEntryId);
+        args.putString(OWNER, owner);
         fragment.setArguments(args);
         return fragment;
     }
@@ -71,15 +59,10 @@ public class DetailFragment extends Fragment {
         setRetainInstance(true);
 
         if (getArguments() != null) {
-            beaconPrefix = getArguments().getString(BEACON_PREFIX);
-            proximityUUUID = getArguments().getString(PROXIMITY_UUID);
-            major = getArguments().getString(MAJOR);
-            minor = getArguments().getString(MINOR);
-            tx = getArguments().getString(TX);
-            scanRecord = getArguments().getByteArray(SCAN_RECORD);
+            logEntryId = getArguments().getInt(LOG_ENTRY_ID);
+            logEntry = DbHelper.getInstance().getLogEntry(logEntryId);
+            mOwner = getArguments().getString(OWNER);
         }
-
-        mScanRecordAdapter = new ScanRecordAdapter(scanRecord, getActivity());
 
     }
 
@@ -88,30 +71,26 @@ public class DetailFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+        mFinishButton = (Button) rootView.findViewById(R.id.fragment_detail_finish_button);
+        mMessageField = (EditText) rootView.findViewById(R.id.fragment_detail_message);
+        mMessageField.setText(logEntry.getMessage());
 
-        TextView majorText = (TextView) rootView.findViewById(R.id.detail_layout_major);
-        TextView minorText = (TextView) rootView.findViewById(R.id.detail_layout_minor);
-        TextView prefixText = (TextView) rootView.findViewById(R.id.detail_layout_beacon_prefix);
-        TextView uuidText = (TextView) rootView.findViewById(R.id.detail_layout_uuid);
-        TextView txText = (TextView) rootView.findViewById(R.id.detail_layout_tx);
-        GridView scanRecordGrid = (GridView) rootView.findViewById(R.id.bth_detail_scan_record);
+        mStatusView = (MouseIndicatorView) rootView.findViewById(R.id.fragment_detail_status_indicator);
+        BeaconParser.BeaconData data = BeaconParser.read(logEntry.getByteRecord());
 
-        scanRecordGrid.setAdapter(mScanRecordAdapter);
-
-        majorText.setText(major);
-        minorText.setText(minor);
-        prefixText.setText(beaconPrefix);
-        uuidText.setText(proximityUUUID);
-        txText.setText(tx);
-
-        return rootView;
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+        if (Integer.valueOf(data.getMinor()) == 0) {
+            mStatusView.setState(MouseIndicatorView.NO_MOUSE);
+        } else {
+            mStatusView.setState(MouseIndicatorView.MOUSE_FOUND);
         }
+
+        mFinishButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new ConfirmTask(mListener.getDeviceForEntry(logEntry), mOwner, logEntry).execute();
+            }
+        });
+        return rootView;
     }
 
     @Override
@@ -144,61 +123,50 @@ public class DetailFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onFragmentInteraction(Uri uri);
+        public void finishEntry(Integer logEntryId);
+        public BluetoothDevice getDeviceForEntry(LogEntry entry);
     }
 
-    public class ScanRecordAdapter extends BaseAdapter {
+    public class ConfirmTask extends AsyncTask<Void, Void, Void> {
+        private final BluetoothDevice device;
+        private final String owner;
+        private final LogEntry entry;
 
-        byte[] items;
-        Context context;
-
-        public ScanRecordAdapter(byte[] items, Context context) {
-            this.items = items;
-            this.context = context;
+        public ConfirmTask(BluetoothDevice device, String owner, LogEntry entry) {
+            this.device = device;
+            this.owner = owner;
+            this.entry = entry;
         }
 
         @Override
-        public int getCount() {
-            return items.length;
+        protected void onPreExecute() {
+            mFinishButton.setEnabled(false);
+            mMessageField.setEnabled(false);
+            mStatusView.setState(MouseIndicatorView.COMM);
         }
 
         @Override
-        public Object getItem(int position) {
-            return items[position];
+        protected Void doInBackground(Void... params) {
+            Comm.sign(entry, device, owner);
+
+            return null;
         }
 
         @Override
-        public long getItemId(int position) {
-            return position;
-        }
+        protected  void onPostExecute(Void result) {
+            mFinishButton.setEnabled(true);
+            entry.setMessage(mMessageField.getText().toString());
+            mMessageField.setEnabled(true);
+            DbHelper.getInstance().updateLogEntry(entry);
+            mListener.finishEntry(entry.getId());
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View cellView;
-            if (convertView == null) {
-                LayoutInflater inflater = (LayoutInflater) context
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                cellView = inflater.inflate(R.layout.detail_cell, parent, false);
+            BeaconParser.BeaconData data = BeaconParser.read(logEntry.getByteRecord());
+
+            if (Integer.valueOf(data.getMinor()) == 0) {
+                mStatusView.setState(MouseIndicatorView.NO_MOUSE);
             } else {
-                cellView = convertView;
+                mStatusView.setState(MouseIndicatorView.MOUSE_FOUND);
             }
-
-            TextView byteValueView = (TextView) cellView.findViewById(R.id.bth_detail_cell_value);
-            TextView byteTypeView = (TextView) cellView.findViewById(R.id.bth_detail_cell_type);
-            TextView cellIndexView = (TextView) cellView.findViewById(R.id.bth_detail_cell_index);
-            byteValueView.setText(BeaconParser.subBytesToHex(items, position, position));
-            cellIndexView.setText(String.valueOf(position));
-            byteTypeView.setText(BeaconParser.getByteTypeForIndex(position).getType());
-
-            if (position < 9) {
-                cellView.setBackgroundResource(R.color.brigh_orange);
-            } else if (position < 30) {
-                cellView.setBackgroundResource(R.color.light_blue);
-            } else {
-                cellView.setBackgroundResource(R.color.smokey_grey);
-            }
-
-
-            return cellView;
         }
     }
 

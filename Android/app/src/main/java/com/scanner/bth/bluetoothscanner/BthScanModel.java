@@ -40,6 +40,11 @@ public class BthScanModel {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
+            if (targetList.contains(result.getDevice().getAddress())) {
+                return;
+            }
+
+            targetList.add(result.getDevice().getAddress());
             for (BthScanView view : mViews) {
                 view.onLeScan(result);
             }
@@ -49,6 +54,12 @@ public class BthScanModel {
         public void onBatchScanResults(List<ScanResult> results) {
             super.onBatchScanResults(results);
             for (ScanResult result : results) {
+                if (targetList.contains(result.getDevice().getAddress())) {
+                    return;
+                }
+
+                targetList.add(result.getDevice().getAddress());
+
                 for (BthScanView view : mViews) {
                     view.onLeScan(result);
                 }
@@ -65,8 +76,8 @@ public class BthScanModel {
     private boolean mScanning = false;
     private Handler mHandler = new Handler();
 
-    // A list of targets to scan for. Once we find all these, we end the scan if we find
-    // them before the threshold timer.
+    // A list of targets to ignore. This is to prevent duplicates during a scan. We hit each
+    // device only once.
     HashSet<String> targetList = new HashSet<String>();
     LinkedList<BthScanView> mViews = new LinkedList<BthScanView>();
 
@@ -77,6 +88,7 @@ public class BthScanModel {
     }
 
     public void scanLeDevice(final boolean enable) {
+        targetList.clear();
         if (enable) {
             notifyScanStart();
             mScanning = true;

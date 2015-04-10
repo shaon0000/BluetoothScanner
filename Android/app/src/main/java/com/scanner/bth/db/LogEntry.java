@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public class LogEntry {
 
+    String message;
     Integer id;
     UUID logId;
 
@@ -12,7 +13,43 @@ public class LogEntry {
     Long lastMouseEvent;
     String lastSigner;
 
+    public void setByteRecord(String byteRecord) {
+        this.byteRecord = byteRecord;
+    }
+
+    public void setDeviceLastChecked(Long deviceLastChecked) {
+        this.deviceLastChecked = deviceLastChecked;
+    }
+
+    public void setLastMouseEvent(Long lastMouseEvent) {
+        this.lastMouseEvent = lastMouseEvent;
+    }
+
+    public void setLastSigner(String lastSigner) {
+        this.lastSigner = lastSigner;
+    }
+
+    public void setCurrentSigner(String currentSigner) {
+        this.currentSigner = currentSigner;
+    }
+
+    public void setCurrentDeviceCheckTime(Long currentDeviceCheckTime) {
+        this.currentDeviceCheckTime = currentDeviceCheckTime;
+    }
+
+    public void setLastUpdated(Long lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public void setLastSynced(Long lastSynced) {
+        this.lastSynced = lastSynced;
+    }
+
     String currentSigner;
+
+    // The moment when communication happened with the device.
+    // This is zero/null otherwise. It can be used to check whether a device
+    // was ever found.
     Long currentDeviceCheckTime;
 
     Long timeCreated;
@@ -21,7 +58,7 @@ public class LogEntry {
 
     public LogEntry(Integer id, UUID logId, String byteRecord, Long deviceLastChecked, Long lastMouseEvent,
                     String lastSigner, String currentSigner, Long lastUpdated, Long lastSynced,
-                    Long currentDeviceCheckTime, Long timeCreated) {
+                    Long currentDeviceCheckTime, Long timeCreated, String message) {
 
         this.id = id;
         this.logId = logId;
@@ -34,6 +71,7 @@ public class LogEntry {
         this.lastSynced = lastSynced;
         this.currentDeviceCheckTime = currentDeviceCheckTime;
         this.timeCreated = timeCreated;
+        this.message = message;
     }
 
 
@@ -80,4 +118,8 @@ public class LogEntry {
     public Integer getId() {
         return id;
     }
+
+    public String getMessage() { return message; }
+
+    public void setMessage(String message) {this.message = message; }
 }

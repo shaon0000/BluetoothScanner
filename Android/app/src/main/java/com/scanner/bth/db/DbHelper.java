@@ -18,7 +18,7 @@ import java.util.UUID;
  */
 public class DbHelper extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 6;
     public static final String DATABASE_NAME = "FeedReader.db";
 
     private static DbHelper instance = null;
@@ -95,6 +95,14 @@ public class DbHelper extends SQLiteOpenHelper {
         return log;
     }
 
+    public void updateLog(Log log) {
+        long now = System.currentTimeMillis();
+        SQLiteDatabase db = this.getReadableDatabase();
+        LogTable table = LogTable.getSingleton();
+        log.setLastUpdated(now);
+        db.update(table.getName(), table.serialize(log), LogTable._UUID.getKey()+ "=?", new String[] {log.getUuid().toString()});
+    }
+
     public UUID createLog(String owner, Long locationId) {
         long now = System.currentTimeMillis();
         Log log = new Log(UUID.randomUUID(), now, now, owner, 0L, false, locationId);
@@ -103,6 +111,57 @@ public class DbHelper extends SQLiteOpenHelper {
         LogTable table = LogTable.getSingleton();
         db.insert(table.getName(), null, table.serialize(log));
         return log.getUuid();
+    }
+
+    public void createLogEntry(UUID logId, String byteRecord) {
+        long now = System.currentTimeMillis();
+        LogEntry entry = new LogEntry(0, logId, byteRecord, 0L, 0L,
+                null, null, now, 0L,
+                0L, now, null);
+        SQLiteDatabase db = this.getWritableDatabase();
+        LogEntryTable table = LogEntryTable.getSingleton();
+        db.insert(table.getName(), null, table.serialize(entry));
+
+        Log log = getLog(logId);
+        updateLog(log);
+
+    }
+
+    public void updateLogEntry(LogEntry entry) {
+        long now = System.currentTimeMillis();
+        entry.setLastUpdated(now);
+        SQLiteDatabase db = this.getWritableDatabase();
+        LogEntryTable table = LogEntryTable.getSingleton();
+        db.update(table.getName(), table.serialize(entry), LogEntryTable._ID.getKey()+"=?",
+                new String [] {entry.getId().toString()});
+
+        Log log = getLog(entry.getLogId());
+        log.setLastUpdated(now);
+        updateLog(log);
+    }
+
+    public List<LogEntry> getLogEntries(Log log, Column sortBy, boolean asc) {
+        List<LogEntry> logList = new ArrayList<LogEntry>();
+        LogEntryTable table = LogEntryTable.getSingleton();
+        // Select All Query
+        String [] columns = table.getColumnNamesArray();
+
+        String orderBy = (sortBy == null) ? null : (sortBy.getKey() + (asc == true ? " ASC" : " DESC"));
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(table.getName(), columns, LogEntryTable.LOG_ID.getKey() + "=?",
+                new String[] {log.getUuid().toString()}, null, null, orderBy);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+
+                // Adding contact to list
+                logList.add(table.deserialize(cursor));
+            } while (cursor.moveToNext());
+        }
+
+        // return contact list
+        return logList;
     }
 
     public List<Location> getAllLocations() {
@@ -174,6 +233,24 @@ public class DbHelper extends SQLiteOpenHelper {
         return results;
     }
 
+    public LocationDevice getLocationDevice(Long locationId, String deviceUuid) {
+        String WHERE = LocationDeviceTable.LOCATION_ID.getKey() + "=? AND " + LocationDeviceTable.UUID.getKey() + "=?";
+        SQLiteDatabase db = this.getReadableDatabase();
+        LocationDeviceTable table = LocationDeviceTable.getSingleton();
+
+        Cursor cursor = db.query(table.getName(), table.getColumnNamesArray(), WHERE,
+                new String[] { String.valueOf(locationId), deviceUuid }, null, null, null, null);
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+        } else {
+            throw new RuntimeException("could not get the requested device: " + deviceUuid.toString());
+        }
+
+        LocationDevice log = table.getSingleton().deserialize(cursor);
+        return log;
+    }
+
     public void addDevicesToLocation(ArrayList<LocationDevice> devices) {
         SQLiteDatabase db = this.getWritableDatabase();
         LocationDeviceTable table = LocationDeviceTable.getSingleton();
@@ -181,5 +258,21 @@ public class DbHelper extends SQLiteOpenHelper {
         for (LocationDevice device : devices) {
             db.insert(table.getName(), null, table.serialize(device));
         }
+    }
+
+    public LogEntry getLogEntry(Integer logEntryId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        LogEntryTable table = LogEntryTable.getSingleton();
+        Cursor cursor = db.query(table.getName(), table.getColumnNamesArray(), LogEntryTable._ID.getKey() + "=?",
+                new String[] { logEntryId.toString() }, null, null, null, null);
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+        } else {
+            throw new RuntimeException("could not get the requested log: " + String.valueOf(logEntryId));
+        }
+
+        LogEntry entry = LogEntryTable.getSingleton().deserialize(cursor);
+        return entry;
     }
 }

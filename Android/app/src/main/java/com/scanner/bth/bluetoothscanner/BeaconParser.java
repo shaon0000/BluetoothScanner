@@ -1,7 +1,5 @@
 package com.scanner.bth.bluetoothscanner;
 
-import java.util.HashMap;
-
 /**
  * We use this to parse the advertisement ID and pull up the right data. This in conjunction with
  * some filter mechanism can be used to look for the right devices.
@@ -116,12 +114,12 @@ public class BeaconParser {
         }
 
         public int hashCode() {
-            return (beacon_prefix + proximity_uuid).hashCode();
+            return proximity_uuid.hashCode();
         }
 
         public boolean equals(Object other) {
             BeaconData data = (BeaconData) other;
-            return (beacon_prefix + proximity_uuid).contentEquals(data.getBeacon_prefix() + data.getProximity_uuid());
+            return (proximity_uuid).contentEquals(data.proximity_uuid);
         }
     }
 
@@ -161,14 +159,14 @@ public class BeaconParser {
         return data;
     }
 
-    public static BeaconData read(String uuid) {
-        String fullRecord = uuid + "0000" + "0000" + "00";
-        byte [] byteData = hexStringToByteArray(uuid);
+    public static BeaconData read(String s) {
+        byte [] byteData = hexStringToByteArray(s);
+
         return read(byteData);
     }
 
     public static BeaconData read(byte[] bytes) {
-        int expected_size = 13 + 30 + 3;
+        int expected_size = 29;
         if (bytes.length < expected_size) {
             return null;
         }

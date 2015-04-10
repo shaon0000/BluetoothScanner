@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public class LogEntryTable extends BaseTable<LogEntry> {
-    private static LogTable mSingleton;
+    private static LogEntryTable mSingleton;
 
     public static final Column _ID = new Column("_id", Column.PRIMARY_INT_KEY);
 
@@ -27,6 +27,8 @@ public class LogEntryTable extends BaseTable<LogEntry> {
     public static final Column LAST_UPDATED = new Column("last_updated", Column.LONG);
     public static final Column LAST_SYNCED = new Column("last_synced", Column.LONG);
     private static final Column TIME_CREATED = new Column("time_created", Column.LONG);
+
+    public static final Column MESSAGE = new Column("message", Column.STRING);
 
     private static final ArrayList<Column> mColumns = new ArrayList<>();
 
@@ -46,6 +48,7 @@ public class LogEntryTable extends BaseTable<LogEntry> {
         mColumns.add(TIME_CREATED);
         mColumns.add(LAST_UPDATED);
         mColumns.add(LAST_SYNCED);
+        mColumns.add(MESSAGE);
     }
 
 
@@ -77,6 +80,7 @@ public class LogEntryTable extends BaseTable<LogEntry> {
         values.put(LAST_UPDATED.getKey(), obj.getLastUpdated());
         values.put(LAST_SYNCED.getKey(), obj.getLastSynced());
 
+        values.put(MESSAGE.getKey(), obj.getMessage());
         return values;
     }
 
@@ -98,14 +102,16 @@ public class LogEntryTable extends BaseTable<LogEntry> {
         Long lastUpdated = (Long) extract(LAST_UPDATED, cursor);
         Long lastSynced = (Long) extract(LAST_SYNCED, cursor);
 
+        String message = (String) extract(MESSAGE, cursor);
+
         return new LogEntry(id, logId, byteRecord, deviceLastChecked, lastMouseEvent,
                 lastSigner, currentSigner, lastUpdated, lastSynced,
-                currentDeviceCheckTime, timeCreated);
+                currentDeviceCheckTime, timeCreated, message);
     }
 
-    public static LogTable getSingleton() {
+    public static LogEntryTable getSingleton() {
         if (mSingleton == null) {
-            mSingleton = new LogTable();
+            mSingleton = new LogEntryTable();
         }
 
         return mSingleton;
