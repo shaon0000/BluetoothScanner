@@ -29,7 +29,8 @@ import java.util.UUID;
 
 
 public class ScannerActivity extends ActionBarActivity implements
-        ItemFragment.OnFragmentInteractionListener, DetailFragment.OnFragmentInteractionListener {
+        ItemFragment.OnFragmentInteractionListener, DetailFragment.OnFragmentInteractionListener,
+        ReportFragment.OnFragmentInteractionListener {
 
     // Used to update information about said device.
     public static final String LOG_ID_EXTRA = "com.scanner.bth.bluetoothscanner.MainActivity.LOG_ID_EXTRA";
@@ -45,31 +46,29 @@ public class ScannerActivity extends ActionBarActivity implements
 
     private static final String TAG_LIST_FRAGMENT = "bth_list_fragment";
     private static final String TAG_DETAIL_FRAGMENT = "bth_detail_framgment";
+    private static final String TAG_REPORT_FRAGMENT = "bth_report_fragment";
+
     private MenuItem mStartScanButton;
     private MenuItem mStopScanButton;
     private long mLocationId;
     private String mLogId;
     com.scanner.bth.db.Log mLog;
     private BthScanResultsModel mScanResultModel;
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
-
-    @Override
-    public void finishEntry(Integer logEntryId) {
-        mScanResultFragment.reloadFromDb(logEntryId);
-    }
-
-    @Override
-    public BluetoothDevice getDeviceForEntry(LogEntry entry) {
-        return null;
-    }
+    private Location mLocation;
 
     @Override
     public BthScanResultsModel getBthScanResultsModel() {
         return mScanResultModel;
+    }
+
+    @Override
+    public void generateReport() {
+        ReportFragment reportFragment = ReportFragment.newInstance(UUID.fromString(mLogId));
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, reportFragment)
+                        // Add this transaction to the back stack
+                .addToBackStack(TAG_REPORT_FRAGMENT)
+                .commit();
     }
 
 
@@ -79,7 +78,7 @@ public class ScannerActivity extends ActionBarActivity implements
         public void onLeScan(android.bluetooth.le.ScanResult result) {
             Log.d("SCAN", "Found an item");
             BthScanResultsModel.ScanResult scanResult = new BthScanResultsModel.ScanResult(result.getDevice(), result.getScanRecord());
-            mScanResultFragment.addDevice(scanResult);
+            mScanResultModel.addDevice(scanResult);
         }
 
         @Override
@@ -103,9 +102,15 @@ public class ScannerActivity extends ActionBarActivity implements
 
         FragmentManager fm = getSupportFragmentManager();
         mScanResultFragment = (ItemFragment) fm.findFragmentByTag(TAG_LIST_FRAGMENT);
+        mLogId = getIntent().getExtras().getString(ScannerActivity.LOG_ID_EXTRA);
+        mLog = DbHelper.getInstance().getLog(UUID.fromString(mLogId));
+        mLocationId = mLog.getLocationId();
 
+
+        mLocation = DbHelper.getInstance().getLocation(mLog.getLocationId());
         if (mScanResultFragment == null) {
-            mScanResultFragment = new ItemFragment();
+
+            mScanResultFragment = ItemFragment.newInstance(mLocation.getAddress());
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, mScanResultFragment, TAG_LIST_FRAGMENT)
                     .commit();
@@ -130,10 +135,9 @@ public class ScannerActivity extends ActionBarActivity implements
 
 
         Log.d(ScannerActivity.class.getSimpleName(), "location id: " + mLocationId);
-        mLogId = getIntent().getExtras().getString(ScannerActivity.LOG_ID_EXTRA);
+
         if (savedInstanceState == null) {
-            mLog = DbHelper.getInstance().getLog(UUID.fromString(mLogId));
-            mLocationId = mLog.getLocationId();
+
             final List<LocationDevice> devices = DbHelper.getInstance().getLocalLocationDevices(new Location(mLocationId, null, null));
             final List<LogEntry> logEntries = DbHelper.getInstance().getLogEntries(mLog, null, false);
             Log.d(ScannerActivity.class.getSimpleName(), "device count: " + devices.size());
@@ -143,7 +147,7 @@ public class ScannerActivity extends ActionBarActivity implements
                     for (LogEntry entry : logEntries) {
                         BeaconParser.BeaconData data = BeaconParser.read(entry.getByteRecord());
                         LocationDevice device = DbHelper.getInstance().getLocationDevice(mLocationId, data.getProximity_uuid());
-                        mScanResultFragment.prePopulate(entry, device);
+                        mScanResultModel.prePopulate(entry, device);
                     }
                 }
             });
@@ -206,17 +210,17 @@ public class ScannerActivity extends ActionBarActivity implements
 
     @Override
     public void onClickDevice(BthScanResultsModel.ScanResult result) {
-
-        if (result.isCommunicating()) {
-            return;
-        }
-
         DetailFragment detailFragment = DetailFragment.newInstance(result.getlogEntry().getId(), "test", result.getLocationDevice().getName(), 0);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, detailFragment)
                         // Add this transaction to the back stack
                 .addToBackStack(TAG_DETAIL_FRAGMENT)
                 .commit();
+    }
+
+    @Override
+    public void reportFinished() {
+        mScanResultModel.completeLog();
     }
 
     /**

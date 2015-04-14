@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 
+
 /**
  * Created by shaon0000 on 2015-04-10.
  *
@@ -21,6 +22,8 @@ import java.util.LinkedList;
  * notifies views when the whole data set changes so that it may update itself.
  */
 public class BthScanResultsModel {
+
+
 
     private LinkedList<BthScanResultsView> views = new LinkedList<>();
 
@@ -31,24 +34,72 @@ public class BthScanResultsModel {
         views.add(view);
     }
 
+    public void detachView(BthScanResultsView view) {
+        views.remove(view);
+    }
+
+    public ScanResult getScanResult(Integer logEntryId) {
+        for (BthScanResultsModel.ScanResult result : bthList) {
+            if (result.getlogEntry().getId() == logEntryId) {
+                return result;
+            }
+        }
+
+        throw new RuntimeException("No results had the longEntry");
+    }
+
+    public boolean isListAllChecked() {
+        for (ScanResult result : bthList) {
+            if (result.getlogEntry().getCurrentDeviceCheckTime() == 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void completeLog() {
+        bthList.clear();
+        bthSet.clear();
+        updateViews();
+    }
+
     public static interface BthScanResultsView {
         public void updateView();
         public void updateSingleItem(ScanResult result);
-        public void onPreCommunication(ScanResult result);
-        public void onPostCommunication(ScanResult result);
-
     }
-    public class CommTask extends AsyncTask<Void, Void, Void> {
-        private final BthScanResultsModel.ScanResult scannedObject;
 
-        public CommTask(BthScanResultsModel.ScanResult scannedObject) {
+    public static abstract class BaseCommTask<A, B, C> extends AsyncTask<A, B, C> {
+        private final BthScanResultsModel.ScanResult scannedObject;
+        private final BthScanResultsModel model;
+        public BaseCommTask(BthScanResultsModel.ScanResult scannedObject, BthScanResultsModel model) {
             this.scannedObject = scannedObject;
+            this.model = model;
         }
 
         @Override
         public void onPreExecute() {
-            viewsOnPreCommunication(scannedObject);
+            scannedObject.setCommunicating(true);
+            model.updateViews(scannedObject);
         }
+
+
+        @Override
+        protected void onPostExecute(C result) {
+            scannedObject.setCommunicating(false);
+            model.updateViews(scannedObject);
+        }
+    }
+
+    public class CommTask extends BaseCommTask<Void, Void, Void> {
+        private final BthScanResultsModel.ScanResult scannedObject;
+
+        public CommTask(BthScanResultsModel.ScanResult scannedObject) {
+            super(scannedObject, BthScanResultsModel.this);
+            this.scannedObject = scannedObject;
+        }
+
+
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -57,18 +108,35 @@ public class BthScanResultsModel {
             return null;
         }
 
-        @Override
-        protected void onPostExecute(Void result) {
-            scannedObject.setCommunicating(false);
-            viewsOnPostCommunication(scannedObject);
-            updateViews(scannedObject);
-        }
     }
     public static class ScanResult {
+
+        public static final int SEARCHING = 1;
+        public static final int COMM = 2;
+        public static final int NO_MOUSE = 4;
+        public static final int MOUSE_FOUND = 8;
+
         LocationDevice locationDevice;
         BluetoothDevice device;
         ScanRecord record;
         BeaconParser.BeaconData parsedData;
+
+        public int getStatus() {
+            if (device == null && logEntry.getCurrentDeviceCheckTime() == 0) {
+                return SEARCHING;
+            }
+
+            if (isCommunicating()) {
+                return COMM;
+            }
+
+            if (Integer.valueOf(parsedData.getMinor()) == 0) {
+                return NO_MOUSE;
+            } else {
+                return MOUSE_FOUND;
+            }
+        }
+
 
         public boolean isCommunicating() {
             return communicating;
@@ -131,7 +199,9 @@ public class BthScanResultsModel {
 
             long now = System.currentTimeMillis();
             logEntry.setByteRecord(BeaconParser.bytesToHex(result.getRecord().getBytes()));
+
             logEntry.setLastUpdated(now);
+
         }
 
         public LogEntry getlogEntry() {
@@ -155,18 +225,6 @@ public class BthScanResultsModel {
         }
     }
 
-    private void viewsOnPreCommunication(ScanResult result) {
-        for(BthScanResultsView view: views) {
-            view.onPreCommunication(result);
-        }
-    }
-
-    private void viewsOnPostCommunication(ScanResult result) {
-        for(BthScanResultsView view: views) {
-            view.onPostCommunication(result);
-        }
-    }
-
     public void prePopulate(LogEntry entry, LocationDevice device) {
         BthScanResultsModel.ScanResult result = new BthScanResultsModel.ScanResult(entry, device);
         if (bthSet.contains(result)) {
@@ -174,6 +232,7 @@ public class BthScanResultsModel {
         }
         bthList.add(result);
         bthSet.add(result);
+        updateViews();
     }
 
     public boolean addDevice(BthScanResultsModel.ScanResult result) {
@@ -196,14 +255,15 @@ public class BthScanResultsModel {
 
     }
 
-    public void reloadFromDb(Integer logEntryId) {
+    public ScanResult reloadFromDb(Integer logEntryId) {
         for (BthScanResultsModel.ScanResult result : bthList) {
             if (result.getlogEntry().getId() == logEntryId) {
                 result.setlogEntry(DbHelper.getInstance().getLogEntry(logEntryId));
                 updateViews(result);
-                break;
+                return result;
             }
         }
+        throw new RuntimeException("log with id: " + logEntryId + " was not found");
     }
 
     public int getCount() {
@@ -221,5 +281,16 @@ public class BthScanResultsModel {
         return position;
     }
 
+    public int getPosition(ScanResult result) {
+        int i = 0;
+        for(BthScanResultsModel.ScanResult obj : bthList) {
+            if (result.equals(obj)) {
+                return i;
+            }
+            i++;
+        }
+
+        throw new RuntimeException("result: " + result.toString() + " was not found in the model");
+    }
 
 }

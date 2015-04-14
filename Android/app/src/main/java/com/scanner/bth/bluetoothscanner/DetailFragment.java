@@ -34,7 +34,6 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
     private static final String DEVICE_NAME = "device_name";
 
     private Integer logEntryId;
-    private LogEntry logEntry;
     private String mOwner;
     private String mDeviceName;
     private int mPosition;
@@ -45,6 +44,7 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
     MouseIndicatorView mStatusView;
     private TextView mDeviceNameView;
     private TextView mPositionView;
+    private BthScanResultsModel.ScanResult mScanResult;
 
     public static DetailFragment newInstance(
             Integer logEntryId, String owner, String deviceName, int position) {
@@ -53,7 +53,6 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
         args.putInt(LOG_ENTRY_ID, logEntryId);
         args.putString(OWNER, owner);
         args.putString(DEVICE_NAME, deviceName);
-        args.putInt(POSITION, position);
         fragment.setArguments(args);
         return fragment;
     }
@@ -69,10 +68,10 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
 
         if (getArguments() != null) {
             logEntryId = getArguments().getInt(LOG_ENTRY_ID);
-            logEntry = DbHelper.getInstance().getLogEntry(logEntryId);
+            mScanResult = mListener.getBthScanResultsModel().getScanResult(logEntryId);
             mOwner = getArguments().getString(OWNER);
             mDeviceName = getArguments().getString(DEVICE_NAME);
-            mPosition = getArguments().getInt(POSITION);
+            mPosition = mListener.getBthScanResultsModel().getPosition(mScanResult);
         }
 
     }
@@ -86,24 +85,15 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
         mMessageField = (EditText) rootView.findViewById(R.id.fragment_detail_message);
         mDeviceNameView = (TextView) rootView.findViewById(R.id.fragment_detail_device_name);
         mPositionView = (TextView) rootView.findViewById(R.id.fragment_detail_index);
-
-        mDeviceNameView.setText(mDeviceName);
-        mPositionView.setText(String.valueOf(mPosition));
-        mMessageField.setText(logEntry.getMessage());
-
         mStatusView = (MouseIndicatorView) rootView.findViewById(R.id.fragment_detail_status_indicator);
-        BeaconParser.BeaconData data = BeaconParser.read(logEntry.getByteRecord());
 
-        if (Integer.valueOf(data.getMinor()) == 0) {
-            mStatusView.setState(MouseIndicatorView.NO_MOUSE);
-        } else {
-            mStatusView.setState(MouseIndicatorView.MOUSE_FOUND);
-        }
+
+        updateView();
 
         mFinishButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new ConfirmTask(mListener.getDeviceForEntry(logEntry), mOwner, logEntry).execute();
+                new ConfirmTask(mMessageField.getText().toString()).execute();
             }
         });
         return rootView;
@@ -126,27 +116,35 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
     @Override
     public void onDetach() {
         super.onDetach();
+        mListener.getBthScanResultsModel().detachView(this);
         mListener = null;
     }
 
     @Override
     public void updateView() {
+        mDeviceNameView.setText(mDeviceName);
+        mPositionView.setText(String.valueOf(mPosition));
+        mMessageField.setText(mScanResult.getlogEntry().getMessage());
+        int minor = Integer.valueOf(mScanResult.getBeaconData().getMinor());
+
+        mStatusView.setState(mScanResult.getStatus());
+
+        // If we're searching or we're communicating, we can't type up a message.
+        if ((mScanResult.getStatus() & (BthScanResultsModel.ScanResult.SEARCHING | BthScanResultsModel.ScanResult.COMM)) != 0) {
+            mMessageField.setEnabled(false);
+            mFinishButton.setEnabled(false);
+        } else {
+            mMessageField.setEnabled(true);
+            mFinishButton.setEnabled(true);
+        }
 
     }
 
     @Override
     public void updateSingleItem(BthScanResultsModel.ScanResult result) {
-
-    }
-
-    @Override
-    public void onPreCommunication(BthScanResultsModel.ScanResult result) {
-
-    }
-
-    @Override
-    public void onPostCommunication(BthScanResultsModel.ScanResult result) {
-
+        if (result.getBeaconData().getProximity_uuid() == mScanResult.getBeaconData().getProximity_uuid()) {
+            updateView();
+        }
     }
 
     /**
@@ -160,53 +158,32 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(Uri uri);
-        public void finishEntry(Integer logEntryId);
-        public BluetoothDevice getDeviceForEntry(LogEntry entry);
         public BthScanResultsModel getBthScanResultsModel();
     }
 
-    public class ConfirmTask extends AsyncTask<Void, Void, Void> {
-        private final BluetoothDevice device;
-        private final String owner;
-        private final LogEntry entry;
-
-        public ConfirmTask(BluetoothDevice device, String owner, LogEntry entry) {
-            this.device = device;
-            this.owner = owner;
-            this.entry = entry;
+    public class ConfirmTask extends BthScanResultsModel.BaseCommTask<Void, Void, Void> {
+        String message;
+        public ConfirmTask(String message) {
+            super(mScanResult, mListener.getBthScanResultsModel());
+            this.message = message;
         }
 
         @Override
-        protected void onPreExecute() {
-            mFinishButton.setEnabled(false);
-            mMessageField.setEnabled(false);
-            mStatusView.setState(MouseIndicatorView.COMM);
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            Comm.sign(entry, device, owner);
+        public Void doInBackground(Void... params) {
+            Comm.sign(mScanResult.getlogEntry(), mScanResult.getDevice(), mOwner);
 
             return null;
         }
 
         @Override
         protected  void onPostExecute(Void result) {
-            mFinishButton.setEnabled(true);
-            entry.setMessage(mMessageField.getText().toString());
+
+
             mMessageField.setEnabled(true);
-            DbHelper.getInstance().updateLogEntry(entry);
-            mListener.finishEntry(entry.getId());
+            mScanResult.getlogEntry().setMessage(message);
+            DbHelper.getInstance().updateLogEntry(mScanResult.getlogEntry());
 
-            BeaconParser.BeaconData data = BeaconParser.read(logEntry.getByteRecord());
-
-            if (Integer.valueOf(data.getMinor()) == 0) {
-                mStatusView.setState(MouseIndicatorView.NO_MOUSE);
-            } else {
-                mStatusView.setState(MouseIndicatorView.MOUSE_FOUND);
-            }
+            super.onPostExecute(result);
         }
     }
 

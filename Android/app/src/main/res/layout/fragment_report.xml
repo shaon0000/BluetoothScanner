@@ -1,0 +1,64 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_gravity="top"
+    tools:context="com.scanner.bth.bluetoothscanner.ReportFragment">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="@string/fragment_report_title"
+        android:textStyle="bold"
+        android:textSize="15dp"
+        android:typeface="monospace"
+        android:gravity="center"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@color/light_blue"/>
+    <TextView
+        android:padding="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/fragment_report_summary_note"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/light_blue"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp"
+        android:layout_weight="1"
+        >
+        <TextView
+            android:id="@+id/fragment_report__report_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="1234 A St. Mousetrap Report"
+            />
+
+
+    </ScrollView>
+<Button
+    android:id="@+id/fragment_report_button_submit_report"
+    android:layout_width="wrap_content"
+    android:layout_height="50dp"
+    android:text="@string/fragment_report_button_submit_report"
+    android:layout_weight="0"
+    android:layout_gravity="center"
+    android:visibility="gone"/>
+
+<Button
+    android:id="@+id/fragment_report_close_button"
+    android:layout_width="wrap_content"
+    android:layout_height="50dp"
+    android:layout_weight="0"
+    android:layout_gravity="center"
+    android:text="@string/fragment_report_close_button"
+    android:visibility="visible"/>
+</LinearLayout>

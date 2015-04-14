@@ -1,7 +1,5 @@
 package com.scanner.bth.db;
 
-import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -17,7 +15,7 @@ import java.util.UUID;
  */
 public class DbHelper extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 6;
+    public static final int DATABASE_VERSION = 7;
     public static final String DATABASE_NAME = "FeedReader.db";
 
     private static DbHelper instance = null;
@@ -273,5 +271,21 @@ public class DbHelper extends SQLiteOpenHelper {
 
         LogEntry entry = LogEntryTable.getSingleton().deserialize(cursor);
         return entry;
+    }
+
+    public Location getLocation(Long locationId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        LocationTable table = LocationTable.getSingleton();
+        Cursor cursor = db.query(table.getName(), table.getColumnNamesArray(), LocationTable.LOCATION_ID.getKey() + "=?",
+                new String[] { locationId.toString() }, null, null, null, null);
+
+        if (cursor != null) {
+            cursor.moveToFirst();
+        } else {
+            throw new RuntimeException("could not get the requested log: " + String.valueOf(locationId));
+        }
+
+        Location location = LocationTable.getSingleton().deserialize(cursor);
+        return location;
     }
 }

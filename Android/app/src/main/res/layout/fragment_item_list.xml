@@ -1,13 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.scanner.bth.bluetoothscanner.ItemFragment">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        >
 
-    <ListView android:id="@android:id/list" android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <TextView
+            android:id="@+id/fragment_item_list_log_location"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="Riverrun"
+            android:textSize="15dp"
+            android:textStyle="bold"
+            android:typeface="monospace"
+            android:layout_weight="1"/>
+        <Button
+            android:id="@+id/fragment_item_list_complete_log"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_weight="0"
+            android:text="Finish"/>
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@color/light_blue"/>
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
 
-    <TextView android:id="@android:id/empty" android:layout_width="match_parent"
-        android:layout_height="match_parent" android:gravity="center" />
-
-</FrameLayout>
+</LinearLayout>

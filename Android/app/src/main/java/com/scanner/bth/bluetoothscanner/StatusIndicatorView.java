@@ -8,9 +8,9 @@ import java.util.HashMap;
 
 public abstract class StatusIndicatorView extends View {
 
-    HashMap<String, Integer> indicatorMap = new HashMap<String, Integer>();
+    HashMap<Integer, Integer> indicatorMap = new HashMap<Integer, Integer>();
 
-    public void setState(String state) {
+    public void setState(int state) {
         Integer colour = indicatorMap.get(state);
         setBackgroundColor(colour);
     }

@@ -13,16 +13,10 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.TextView;
-
-import com.scanner.bth.db.DbHelper;
-import com.scanner.bth.db.LocationDevice;
-import com.scanner.bth.db.LogEntry;
-
-import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * A fragment representing a list of Items.
@@ -38,8 +32,8 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String LOCATION_NAME = "location_name";
+
 
     private OnFragmentInteractionListener mListener;
 
@@ -47,29 +41,25 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      * The fragment's ListView/GridView.
      */
     private AbsListView mListView;
-
-    public void reloadFromDb(Integer logEntryId) {
-        mAdapter.reloadFromDb(logEntryId);
-    }
+    private TextView mLogNameView;
+    private Button mFinishButton;
+    private String mLocationName;
 
     @Override
     public void updateView() {
         mAdapter.notifyDataSetChanged();
+        if(mListener.getBthScanResultsModel().isListAllChecked()) {
+            mFinishButton.setEnabled(true);
+        } else {
+            mFinishButton.setEnabled(false);
+        }
+
+        mLogNameView.setText(mLocationName);
     }
 
     @Override
     public void updateSingleItem(BthScanResultsModel.ScanResult result) {
         mAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onPreCommunication(BthScanResultsModel.ScanResult result) {
-
-    }
-
-    @Override
-    public void onPostCommunication(BthScanResultsModel.ScanResult result) {
-
     }
 
     /**
@@ -78,10 +68,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      */
 
     private class LeDeviceListAdapter extends BaseAdapter {
-
-        ArrayList<BthScanResultsModel.ScanResult> bthList = new ArrayList<>();
-        HashSet<BthScanResultsModel.ScanResult> bthSet = new HashSet<>();
-
         Context context;
 
         public LeDeviceListAdapter(Context context) {
@@ -89,66 +75,23 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             this.context = context;
         }
 
-        public void prePopulate(LogEntry entry, LocationDevice device) {
-            BthScanResultsModel.ScanResult result = new BthScanResultsModel.ScanResult(entry, device);
-            if (bthSet.contains(result)) {
-                return;
-            }
-            bthList.add(result);
-            bthSet.add(result);
-        }
-
-        public boolean addDevice(BthScanResultsModel.ScanResult result) {
-            if (!bthSet.contains(result)) {
-                Log.d(LeDeviceListAdapter.class.getSimpleName(), "ignoring device not on list" + result.toString());
-                return false;
-            } else {
-
-                BthScanResultsModel.ScanResult priorResult = bthList.get(bthList.lastIndexOf(result));
-                priorResult.update(result);
-                DbHelper.getInstance().updateLogEntry(priorResult.getlogEntry());
-                Log.d(LeDeviceListAdapter.class.getSimpleName(), "used data to update:" + result.toString());
-                Log.d(LeDeviceListAdapter.class.getSimpleName(), "communicating with: " + priorResult.toString());
-
-                priorResult.setCommunicating(true);
-                new CommTask(priorResult).execute();
-                return true;
-            }
-
-        }
-
-        public void reloadFromDb(Integer logEntryId) {
-            for (BthScanResultsModel.ScanResult result : bthList) {
-                if (result.getlogEntry().getId() == logEntryId) {
-                    result.setlogEntry(DbHelper.getInstance().getLogEntry(logEntryId));
-                    notifyDataSetChanged();
-                    break;
-                }
-            }
-        }
-
-        public void clear() {
-
-            bthList.clear();
-            bthSet.clear();
-        }
 
         @Override
         public int getCount() {
 
-            return bthList.size();
+            return mListener.getBthScanResultsModel().getCount();
         }
 
         @Override
         public Object getItem(int position) {
 
-            return bthList.get(position);
+            return mListener.getBthScanResultsModel().getItem(position);
         }
 
         @Override
         public long getItemId(int position) {
 
-            return position;
+            return mListener.getBthScanResultsModel().getItemId(position);
         }
 
         @Override
@@ -159,10 +102,8 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             TextView uuidView = (TextView) rowView.findViewById(R.id.bth_scan_result_uuid);
             ImageView finishedLogEntryView = (ImageView) rowView.findViewById(R.id.bth_scan_result_finished_log_entry);
             StatusIndicatorView indicatorView = (StatusIndicatorView) rowView.findViewById(R.id.status_indicator);
-
-            BluetoothDevice device = bthList.get(position).getDevice();
-            BthScanResultsModel.ScanResult result = bthList.get(position);
-
+            BthScanResultsModel.ScanResult result = (BthScanResultsModel.ScanResult) getItem(position);
+            BluetoothDevice device = result.getDevice();
 
 
             if (device != null) {
@@ -180,40 +121,19 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
                 finishedLogEntryView.setVisibility(View.VISIBLE);
             }
 
-            if (result.getlogEntry().getCurrentDeviceCheckTime() == 0 && device == null) {
-                // We never made shook hands with the device before, and we currently don't have a device.
-                indicatorView.setState(MouseIndicatorView.SEARCHING);
-            } else if (result.isCommunicating()) {
-                indicatorView.setState(MouseIndicatorView.COMM);
-            } else if (beaconData.getMinor().contentEquals("0")) {
-                indicatorView.setState(MouseIndicatorView.NO_MOUSE);
-            } else {
-                indicatorView.setState(MouseIndicatorView.MOUSE_FOUND);
-            }
+            indicatorView.setState(result.getStatus());
 
             return rowView;
         }
     }
 
-    public void addDevice(BthScanResultsModel.ScanResult result) {
-        if (mAdapter.addDevice(result)) {
-            mAdapter.notifyDataSetChanged();
-
-        }
-    }
-
-    public void prePopulate(LogEntry entry, LocationDevice device) {
-        mAdapter.prePopulate(entry, device);
-    }
-
     private LeDeviceListAdapter mAdapter;
 
     // TODO: Rename and change types of parameters
-    public static ItemFragment newInstance(String param1, String param2) {
+    public static ItemFragment newInstance(String locationName) {
         ItemFragment fragment = new ItemFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(LOCATION_NAME, locationName);
         fragment.setArguments(args);
         return fragment;
     }
@@ -226,12 +146,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
     }
 
-    public void clear() {
-        mAdapter.clear();
-        mAdapter.notifyDataSetInvalidated();
-        Log.d("FRAGMENT", "scanning item fragment");
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -239,6 +153,11 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
         // TODO: Change Adapter to display your content
         mAdapter = new LeDeviceListAdapter(getActivity());
+
+        if (getArguments() != null) {
+            mLocationName = getArguments().getString(LOCATION_NAME);
+        }
+
     }
 
     @Override
@@ -248,11 +167,21 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
-        ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
+        mLogNameView = (TextView) view.findViewById(R.id.fragment_item_list_log_location);
+        mFinishButton = (Button) view.findViewById(R.id.fragment_item_list_complete_log);
+
+        mFinishButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.generateReport();
+            }
+        });
+
+        mListView.setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
-
+        updateView();
         return view;
     }
 
@@ -265,11 +194,14 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             throw new ClassCastException(activity.toString()
                     + " must implement OnFragmentInteractionListener");
         }
+
+        mListener.getBthScanResultsModel().attachView(this);
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
+        mListener.getBthScanResultsModel().detachView(this);
         mListener = null;
     }
 
@@ -278,19 +210,6 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (null != mListener) {
             mListener.onClickDevice((BthScanResultsModel.ScanResult) mAdapter.getItem(position));
-        }
-    }
-
-    /**
-     * The default content for this Fragment has a TextView that is shown when
-     * the list is empty. If you would like to change the text, call this method
-     * to supply the text it should use.
-     */
-    public void setEmptyText(CharSequence emptyText) {
-        View emptyView = mListView.getEmptyView();
-
-        if (emptyView instanceof TextView) {
-            ((TextView) emptyView).setText(emptyText);
         }
     }
 
@@ -307,28 +226,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         public void onClickDevice(BthScanResultsModel.ScanResult result);
+        public BthScanResultsModel getBthScanResultsModel();
+        void generateReport();
     }
-
-    public class CommTask extends AsyncTask<Void, Void, Void> {
-        private final BthScanResultsModel.ScanResult scannedObject;
-
-        public CommTask(BthScanResultsModel.ScanResult scannedObject) {
-            this.scannedObject = scannedObject;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            Comm.initExchange(scannedObject.getlogEntry(), scannedObject.getDevice());
-            DbHelper.getInstance().updateLogEntry(scannedObject.getlogEntry());
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            scannedObject.setCommunicating(false);
-
-            mAdapter.notifyDataSetChanged();
-        }
-    }
-
 }

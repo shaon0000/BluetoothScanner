@@ -17,6 +17,10 @@
     <string name="flow_pick_button_sync">Upload Logs</string>
     <string name="flow_pick_button_download_devices">Download Devices</string>
     <string name="title_activity_log_list">LogListActivity</string>
+    <string name="fragment_report_title">Report Summary</string>
+    <string name="fragment_report_summary_note">Please confirm that report looks correct before finalization. You cannot modify the log once the report is completed here. Report will be uploaded if or when internet connection is found</string>
+    <string name="fragment_report_button_submit_report">Submit Report</string>
+    <string name="fragment_report_close_button">Close Log</string>
 
 
 </resources>
