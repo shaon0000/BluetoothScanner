@@ -50,7 +50,7 @@ public class BthScanResultsModel {
 
     public boolean isListAllChecked() {
         for (ScanResult result : bthList) {
-            if (result.getlogEntry().getCurrentDeviceCheckTime() == 0) {
+            if (result.getlogEntry().getCurrentDeviceCheckTime() == 0 && result.getlogEntry().getShouldIgnore() == false) {
                 return false;
             }
         }
@@ -219,7 +219,7 @@ public class BthScanResultsModel {
         }
     }
 
-    private void updateViews(ScanResult result) {
+    public void updateViews(ScanResult result) {
         for(BthScanResultsView view: views) {
             view.updateSingleItem(result);
         }

@@ -94,11 +94,23 @@
         android:layout_height="1dp"
         android:layout_marginBottom="5dp"
         android:background="@color/light_blue"/>
-
+    <ToggleButton
+        android:id="@+id/fragment_detail_device_not_found"
+        android:layout_width="wrap_content"
+        android:layout_margin="10dp"
+        android:layout_height="25dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:textSize="10dp"
+        android:layout_gravity="center"
+        android:textColor="@android:color/white"
+        android:background="@android:color/holo_red_dark"
+        android:textOff="Flag Device for Repair"
+        android:textOn="Device Flagged As Broken"/>
     <EditText
         android:id="@+id/fragment_detail_message"
         android:layout_width="fill_parent"
-        android:layout_height="200dp"
+        android:layout_height="150dp"
         android:layout_margin="15dp"
         android:hint="Enter report coment here..."
         android:inputType="textMultiLine"/>
@@ -108,5 +120,6 @@
         android:layout_height="50dp"
         android:layout_gravity="center"
         android:text="Enter"/>
+
 
 </LinearLayout>

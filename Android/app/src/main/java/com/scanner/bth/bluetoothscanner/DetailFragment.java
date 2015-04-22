@@ -1,20 +1,19 @@
 package com.scanner.bth.bluetoothscanner;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothDevice;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.scanner.bth.db.DbHelper;
-import com.scanner.bth.db.LogEntry;
 
 
 /**
@@ -45,6 +44,7 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
     private TextView mDeviceNameView;
     private TextView mPositionView;
     private BthScanResultsModel.ScanResult mScanResult;
+    private ToggleButton mDeviceNotFound;
 
     public static DetailFragment newInstance(
             Integer logEntryId, String owner, String deviceName, int position) {
@@ -86,7 +86,7 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
         mDeviceNameView = (TextView) rootView.findViewById(R.id.fragment_detail_device_name);
         mPositionView = (TextView) rootView.findViewById(R.id.fragment_detail_index);
         mStatusView = (MouseIndicatorView) rootView.findViewById(R.id.fragment_detail_status_indicator);
-
+        mDeviceNotFound = (ToggleButton) rootView.findViewById(R.id.fragment_detail_device_not_found);
 
         updateView();
 
@@ -96,6 +96,32 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
                 new ConfirmTask(mMessageField.getText().toString()).execute();
             }
         });
+        mDeviceNotFound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked == mScanResult.getlogEntry().getShouldIgnore()) {
+                    return;
+                }
+                if (!isChecked) {
+                    mScanResult.getlogEntry().setShouldIgnore(false);
+                    DbHelper.getInstance().updateLogEntry(mScanResult.getlogEntry());
+                    mListener.getBthScanResultsModel().updateViews(mScanResult);
+                    return;
+                }
+
+                String message = mMessageField.getText() == null ? "" : mMessageField.getText().toString();
+                if(message.contentEquals("")) {
+                    Toast.makeText(DetailFragment.this.getActivity(), "Must enter a report", Toast.LENGTH_LONG).show();
+                    mDeviceNotFound.setChecked(false);
+                    return;
+                }
+                mScanResult.getlogEntry().setShouldIgnore(true);
+                mScanResult.getlogEntry().setMessage(message);
+                DbHelper.getInstance().updateLogEntry(mScanResult.getlogEntry());
+                mListener.getBthScanResultsModel().updateViews(mScanResult);
+            }
+        });
+
         return rootView;
     }
 
@@ -131,11 +157,17 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
 
         // If we're searching or we're communicating, we can't type up a message.
         if ((mScanResult.getStatus() & (BthScanResultsModel.ScanResult.SEARCHING | BthScanResultsModel.ScanResult.COMM)) != 0) {
-            mMessageField.setEnabled(false);
             mFinishButton.setEnabled(false);
         } else {
-            mMessageField.setEnabled(true);
             mFinishButton.setEnabled(true);
+        }
+
+        if ((mScanResult.getStatus() & BthScanResultsModel.ScanResult.COMM) != 0) {
+            mMessageField.setEnabled(false);
+            mDeviceNotFound.setEnabled(false);
+        } else {
+            mMessageField.setEnabled(true);
+            mDeviceNotFound.setEnabled(true);
         }
 
     }

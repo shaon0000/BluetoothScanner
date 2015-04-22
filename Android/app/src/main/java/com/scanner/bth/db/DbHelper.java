@@ -114,7 +114,7 @@ public class DbHelper extends SQLiteOpenHelper {
         long now = System.currentTimeMillis();
         LogEntry entry = new LogEntry(0, logId, byteRecord, 0L, 0L,
                 null, null, now, 0L,
-                0L, now, null);
+                0L, now, null, false);
         SQLiteDatabase db = this.getWritableDatabase();
         LogEntryTable table = LogEntryTable.getSingleton();
         db.insert(table.getName(), null, table.serialize(entry));

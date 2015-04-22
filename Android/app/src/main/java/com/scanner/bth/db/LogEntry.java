@@ -13,6 +13,16 @@ public class LogEntry {
     Long lastMouseEvent;
     String lastSigner;
 
+    public Boolean getShouldIgnore() {
+        return shouldIgnore;
+    }
+
+    public void setShouldIgnore(Boolean shouldIgnore) {
+        this.shouldIgnore = shouldIgnore;
+    }
+
+    Boolean shouldIgnore;
+
     public void setByteRecord(String byteRecord) {
         this.byteRecord = byteRecord;
     }
@@ -58,7 +68,7 @@ public class LogEntry {
 
     public LogEntry(Integer id, UUID logId, String byteRecord, Long deviceLastChecked, Long lastMouseEvent,
                     String lastSigner, String currentSigner, Long lastUpdated, Long lastSynced,
-                    Long currentDeviceCheckTime, Long timeCreated, String message) {
+                    Long currentDeviceCheckTime, Long timeCreated, String message, Boolean shouldIgnore) {
 
         this.id = id;
         this.logId = logId;
@@ -72,6 +82,7 @@ public class LogEntry {
         this.currentDeviceCheckTime = currentDeviceCheckTime;
         this.timeCreated = timeCreated;
         this.message = message;
+        this.shouldIgnore = shouldIgnore;
     }
 
 

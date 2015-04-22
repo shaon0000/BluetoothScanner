@@ -8,13 +8,26 @@
     - synced: uploaded on in queue symbol
     - completed: check-mark or X
     -->
-    <TextView
-        android:id="@+id/log_list_item_time_created"
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:padding="10dp"
-        android:text="4/2/2015"/>
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp">
+        <TextView
+            android:id="@+id/log_list_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="1234 A St."
+            android:textStyle="bold"
+            android:textSize="20dp"/>
+        <TextView
+            android:id="@+id/log_list_item_time_created"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="4/2/2015"/>
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/log_list_item_finished"

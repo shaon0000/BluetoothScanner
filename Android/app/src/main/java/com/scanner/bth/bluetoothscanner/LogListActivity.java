@@ -16,6 +16,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.scanner.bth.db.DbHelper;
+import com.scanner.bth.db.Location;
 import com.scanner.bth.db.Log;
 import com.scanner.bth.db.LogTable;
 
@@ -109,7 +110,7 @@ public class LogListActivity extends ActionBarActivity {
             }
 
             Log item = (Log) getItem(position);
-
+            Location location = DbHelper.getInstance().getLocation(item.getLocationId());
             boolean synced = item.getLastUpdated() < item.getLastSynced();
             boolean finished = item.getFinished();
 
@@ -119,8 +120,12 @@ public class LogListActivity extends ActionBarActivity {
 
             ImageView syncView =  (ImageView) rootView.findViewById(R.id.log_list_item_synced);
             ImageView finishView = (ImageView) rootView.findViewById(R.id.log_list_item_finished);
+            TextView log_title = (TextView) rootView.findViewById(R.id.log_list_address);
+
             TextView timeCreatedView = (TextView) rootView.findViewById(
                     R.id.log_list_item_time_created);
+
+            log_title.setText(location.getAddress());
 
             timeCreatedView.setText(format.format(new Date(item.getTimeCreated())));
 

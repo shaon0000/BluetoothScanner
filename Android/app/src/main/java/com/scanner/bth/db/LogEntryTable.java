@@ -27,6 +27,9 @@ public class LogEntryTable extends BaseTable<LogEntry> {
 
     public static final Column MESSAGE = new Column("message", Column.STRING);
 
+    // If this is true, it indicates that the user thought the device was broken.
+    public static final Column SHOULD_IGNORE = new Column("should_ignore", Column.BOOLEAN).setNotNull();
+
     private static final ArrayList<Column> mColumns = new ArrayList<>();
 
 
@@ -46,6 +49,8 @@ public class LogEntryTable extends BaseTable<LogEntry> {
         mColumns.add(LAST_UPDATED);
         mColumns.add(LAST_SYNCED);
         mColumns.add(MESSAGE);
+
+        mColumns.add(SHOULD_IGNORE);
     }
 
 
@@ -78,6 +83,7 @@ public class LogEntryTable extends BaseTable<LogEntry> {
         values.put(LAST_SYNCED.getKey(), obj.getLastSynced());
 
         values.put(MESSAGE.getKey(), obj.getMessage());
+        values.put(SHOULD_IGNORE.getKey(), obj.getShouldIgnore());
         return values;
     }
 
@@ -101,9 +107,11 @@ public class LogEntryTable extends BaseTable<LogEntry> {
 
         String message = (String) extract(MESSAGE, cursor);
 
+        Boolean shouldIgnore = (Boolean) extract(SHOULD_IGNORE, cursor);
+
         return new LogEntry(id, logId, byteRecord, deviceLastChecked, lastMouseEvent,
                 lastSigner, currentSigner, lastUpdated, lastSynced,
-                currentDeviceCheckTime, timeCreated, message);
+                currentDeviceCheckTime, timeCreated, message, shouldIgnore);
     }
 
     public static LogEntryTable getSingleton() {
