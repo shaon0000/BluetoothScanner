@@ -2,14 +2,9 @@ package com.scanner.bth.bluetoothscanner;
 
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.os.Build;
-import android.os.Handler;
 import android.bluetooth.le.ScanCallback;
-
-import com.scanner.bth.db.LocationDevice;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -27,14 +22,31 @@ import java.util.List;
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class BthScanModel {
 
+    public static final boolean SPOOF_DEVICES = false;
+
     // View interface to know the current progress, result, or failure of a scan.
     public static interface BthScanView {
         public void onLeScan(ScanResult result);
         public void onScanStart();
         public void onScanFinish();
+        public void onVirtualScan(byte[] record);
     }
 
+    private VirtualBthScanner.VirtualScanCallback mVirtualCallback = new VirtualBthScanner.VirtualScanCallback() {
+        @Override
+        public void onScanResult(byte[] record) {
+            String sRecord = BeaconParser.bytesToHex(record);
+            if (targetList.contains(sRecord)) {
+                return;
+            }
 
+            targetList.add(sRecord);
+            for (BthScanView view : mViews) {
+                view.onVirtualScan(record);
+            }
+
+        }
+    };
 
     private ScanCallback mLeScanCallback = new ScanCallback() {
         @Override
@@ -74,7 +86,7 @@ public class BthScanModel {
 
     private final BluetoothAdapter mBluetoothAdapter;
     private boolean mScanning = false;
-    private Handler mHandler = new Handler();
+    private VirtualBthScanner spoofScanner = new VirtualBthScanner();
 
     // A list of targets to ignore. This is to prevent duplicates during a scan. We hit each
     // device only once.
@@ -92,12 +104,19 @@ public class BthScanModel {
         if (enable) {
             notifyScanStart();
             mScanning = true;
-            mBluetoothAdapter.getBluetoothLeScanner().startScan(mLeScanCallback);
-
+            if (SPOOF_DEVICES) {
+                spoofScanner.startScan(mVirtualCallback);
+            } else {
+                mBluetoothAdapter.getBluetoothLeScanner().startScan(mLeScanCallback);
+            }
         } else {
             notifyScanFinish();
             mScanning = false;
-            mBluetoothAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
+            if (SPOOF_DEVICES) {
+                spoofScanner.stopScan(mVirtualCallback);
+            } else {
+                mBluetoothAdapter.getBluetoothLeScanner().stopScan(mLeScanCallback);
+            }
         }
     }
 

@@ -1,16 +1,33 @@
 package com.scanner.bth.bluetoothscanner;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.os.Handler;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
+import com.scanner.bth.auth.AuthHelper;
+import com.scanner.bth.auth.AuthLoginActivity;
+import com.scanner.bth.auth.Authenticator;
+import com.scanner.bth.db.AccountDetails;
 import com.scanner.bth.db.DbHelper;
+
+import java.io.IOException;
 
 
 /**
@@ -32,12 +49,17 @@ public class FlowPickFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    // The authority for the sync adapter's content provider
+    public static final String AUTHORITY = "com.scanner.bth.bluetoothscanner.provider";
+    // An account type, in the form of a domain name
+    public static final String ACCOUNT_TYPE = "com.smartwave.android.datasync";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    private Button mLogoutButton;
 
     /**
      * Use this factory method to create a new instance of
@@ -82,7 +104,13 @@ public class FlowPickFragment extends Fragment {
         mPrevButton = (Button) root.findViewById(R.id.flow_pick_prev_log_button);
         mSyncButton = (Button) root.findViewById(R.id.flow_pick_sync);
         mDownloadButton = (Button) root.findViewById(R.id.flow_pick_download);
-
+        mLogoutButton = (Button) root.findViewById(R.id.flow_pick_logout);
+        mSyncButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onSyncButtonClick();
+            }
+        });
         mDownloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,6 +135,14 @@ public class FlowPickFragment extends Fragment {
             }
         });
 
+        mLogoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AuthHelper.logout(getActivity());
+                updateView();
+            }
+        });
+        updateView();
         return root;
     }
 
@@ -168,5 +204,79 @@ public class FlowPickFragment extends Fragment {
     }
 
 
+    public void updateView() {
+        String username = AuthHelper.getUsername(getActivity());
+        if (username == null) {
+            Log.d(FlowPickFragment.class.getSimpleName(), "no username found");
+            Intent intent = new Intent(getActivity(), AuthLoginActivity.class);
+            intent.putExtra(AuthLoginActivity.ARG_AUTH_TYPE, "auth");
+            intent.putExtra(AuthLoginActivity.ARG_ACCOUNT_TYPE, ACCOUNT_TYPE);
+            intent.putExtra(AuthLoginActivity.ARG_IS_ADDING_NEW_ACCOUNT, true);
+            startActivityForResult(intent, FlowPickActivity.AUTH_LOGIN);
+            return;
+        }
 
+        Log.d(FlowPickFragment.class.getSimpleName(), "username: " + username);
+
+        final Account account = new Account(username, ACCOUNT_TYPE);
+        final AccountManagerFuture<Bundle> future = AccountManager.get(getActivity())
+                .getAuthToken(account, "auth", null, getActivity(), null, null);
+        final Handler handler = new Handler();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                Bundle bnd;
+                try {
+                    bnd = future.getResult();
+                    if (bnd == null) {
+                        return;
+                    }
+                    final String authToken = bnd.getString(AccountManager.KEY_AUTHTOKEN);
+                    if (!TextUtils.isEmpty(authToken)) {
+
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                AccountDetails details = DbHelper.getInstance().getAccountDetails();
+                                if (details.getIsAdmin()) {
+                                    mDownloadButton.setVisibility(View.VISIBLE);
+                                    mPrevButton.setVisibility(View.VISIBLE);
+                                    mNewButton.setVisibility(View.VISIBLE);
+                                    mSyncButton.setVisibility(View.VISIBLE);
+                                } else {
+                                    mDownloadButton.setVisibility(View.GONE);
+                                    mPrevButton.setVisibility(View.GONE);
+                                    mNewButton.setVisibility(View.VISIBLE);
+                                    mSyncButton.setVisibility(View.VISIBLE);
+                                    Toast.makeText(getActivity(), "hiding the goods", Toast.LENGTH_LONG).show();
+                                }
+
+
+
+                                // Turn on automatic syncing for the default account and authority
+                                ContentResolver.setSyncAutomatically(account, AUTHORITY, true);
+                            }
+                        });
+
+
+                    }
+                } catch (OperationCanceledException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (AuthenticatorException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(FlowPickFragment.class.getSimpleName(), "returned from activity");
+        if (requestCode == FlowPickActivity.AUTH_LOGIN) {
+                updateView();
+        }
+    }
 }

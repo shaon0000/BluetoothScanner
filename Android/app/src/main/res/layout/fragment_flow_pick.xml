@@ -1,40 +1,106 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/smartwave_blue"
     tools:context="com.scanner.bth.bluetoothscanner.FlowPickFragment">
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/card_view"
+        android:layout_centerHorizontal="true"
+        android:background="@color/smartwave_blue">
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/cannon_logo_login"
+        android:layout_gravity="center"
+/>
+    </FrameLayout>
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/card_view"
         android:layout_centerInParent="true"
-        android:padding="10dp">
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        card_view:cardElevation="4dp"
+        card_view:cardBackgroundColor="@color/smartwave_white"
+        card_view:cardCornerRadius="0dp">
+    <GridLayout
+        android:layout_gravity="center"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:rowCount="3"
+        android:columnCount="3"
+
+        android:background="@color/smartwave_white">
 
         <Button
             android:id="@+id/flow_pick_new_button"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:text="@string/flow_pick_button_new"
+
+            android:background="@drawable/existing_account_button"
+
             />
 
         <Button
             android:id="@+id/flow_pick_prev_log_button"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:text="@string/flow_pick_button_prev_log"/>
+
+            android:background="@drawable/edit_account_button"
+            />
 
         <Button
             android:id="@+id/flow_pick_sync"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:text="@string/flow_pick_button_sync"/>
+
+            android:background="@drawable/sync_button"
+            />
 
         <Button
             android:id="@+id/flow_pick_download"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/flow_pick_button_download_devices"/>
-    </LinearLayout>
+            android:background="@drawable/new_user_button"/>
+        <Button
+            android:id="@+id/flow_pick_about"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/about_button"/>
+        <Button
+            android:id="@+id/flow_pick_logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/logout_button"/>
+    </GridLayout>
+    </android.support.v7.widget.CardView>
+    <LinearLayout
+        android:id="@+id/smartwave_logo_powered"
+        android:paddingBottom="20dp"
+        android:paddingTop="20dp"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true">
+        <TextView
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="powered by "
+            android:fontFamily="sans-serif"
+            android:textSize="10pt"/>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/smartave_logo"/>
+        </LinearLayout>
+
 </RelativeLayout>

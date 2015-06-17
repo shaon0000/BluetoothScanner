@@ -104,6 +104,7 @@ public class BthScanResultsModel {
         @Override
         protected Void doInBackground(Void... params) {
             Comm.initExchange(scannedObject.getlogEntry(), scannedObject.getDevice());
+            Log.d("CommTask", scannedObject.getlogEntry().getCurrentMouseEventTime().toString());
             DbHelper.getInstance().updateLogEntry(scannedObject.getlogEntry());
             return null;
         }
@@ -115,14 +116,23 @@ public class BthScanResultsModel {
         public static final int COMM = 2;
         public static final int NO_MOUSE = 4;
         public static final int MOUSE_FOUND = 8;
+        private VirtualBthScanner.DemoBthDevice demoDevice;
 
         LocationDevice locationDevice;
         BluetoothDevice device;
         ScanRecord record;
         BeaconParser.BeaconData parsedData;
 
+        public boolean noDevice() {
+            if (BthScanModel.SPOOF_DEVICES) {
+                return device == null && demoDevice == null;
+            } else {
+                return device == null;
+            }
+        }
+
         public int getStatus() {
-            if (device == null && logEntry.getCurrentDeviceCheckTime() == 0) {
+            if (noDevice() && logEntry.getCurrentDeviceCheckTime() == 0) {
                 return SEARCHING;
             }
 
@@ -171,6 +181,12 @@ public class BthScanResultsModel {
 
         }
 
+        public ScanResult(byte[] record, VirtualBthScanner.DemoBthDevice device) {
+            this.parsedData = BeaconParser.read(record);
+            this.demoDevice = device;
+
+        }
+
         public BluetoothDevice getDevice() {
             return device;
         }
@@ -194,12 +210,20 @@ public class BthScanResultsModel {
 
         public void update(ScanResult result) {
             device = result.device;
+            demoDevice = result.demoDevice;
             record = result.record;
             parsedData = result.parsedData;
 
             long now = System.currentTimeMillis();
-            logEntry.setByteRecord(BeaconParser.bytesToHex(result.getRecord().getBytes()));
-
+            if (BthScanModel.SPOOF_DEVICES) {
+                if (demoDevice == null) {
+                    logEntry.setByteRecord(BeaconParser.bytesToHex(result.getRecord().getBytes()));
+                } else {
+                    logEntry.setByteRecord(demoDevice.getRecord());
+                }
+            } else {
+                logEntry.setByteRecord(BeaconParser.bytesToHex(result.getRecord().getBytes()));
+            }
             logEntry.setLastUpdated(now);
 
         }
@@ -242,6 +266,11 @@ public class BthScanResultsModel {
         } else {
 
             BthScanResultsModel.ScanResult priorResult = bthList.get(bthList.lastIndexOf(result));
+
+            // If we already signed off the device before, we shouldn't update the device.
+            if (priorResult.getlogEntry().getCurrentSigner() != null) {
+                return false;
+            }
             priorResult.update(result);
             DbHelper.getInstance().updateLogEntry(priorResult.getlogEntry());
             Log.d(BthScanResultsModel.class.getSimpleName(), "used data to update:" + result.toString());

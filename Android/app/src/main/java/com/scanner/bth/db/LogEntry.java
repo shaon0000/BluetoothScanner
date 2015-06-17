@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public class LogEntry {
 
+    Long currentMouseEventTime;
     String message;
     Integer id;
     UUID logId;
@@ -12,6 +13,7 @@ public class LogEntry {
     Long deviceLastChecked;
     Long lastMouseEvent;
     String lastSigner;
+    private Integer batteryLevel;
 
     public Boolean getShouldIgnore() {
         return shouldIgnore;
@@ -66,9 +68,14 @@ public class LogEntry {
     Long lastUpdated;
     Long lastSynced;
 
+    public void setCurrentMouseEventTime(Long currentMouseEventTime) {
+        this.currentMouseEventTime = currentMouseEventTime;
+    }
+
     public LogEntry(Integer id, UUID logId, String byteRecord, Long deviceLastChecked, Long lastMouseEvent,
                     String lastSigner, String currentSigner, Long lastUpdated, Long lastSynced,
-                    Long currentDeviceCheckTime, Long timeCreated, String message, Boolean shouldIgnore) {
+                    Long currentDeviceCheckTime, Long timeCreated, String message, Boolean shouldIgnore,
+                    Long currentMouseEventTime, Integer batteryLevel) {
 
         this.id = id;
         this.logId = logId;
@@ -83,6 +90,8 @@ public class LogEntry {
         this.timeCreated = timeCreated;
         this.message = message;
         this.shouldIgnore = shouldIgnore;
+        this.currentMouseEventTime = currentMouseEventTime;
+        this.batteryLevel = batteryLevel;
     }
 
 
@@ -133,4 +142,14 @@ public class LogEntry {
     public String getMessage() { return message; }
 
     public void setMessage(String message) {this.message = message; }
+
+    public Long getCurrentMouseEventTime() {
+        return this.currentMouseEventTime;
+    }
+
+    public Integer getBatteryLevel() {
+        return this.batteryLevel;
+    }
+
+    public void setBatteryLevel(int batteryLevel) {this.batteryLevel = batteryLevel;}
 }

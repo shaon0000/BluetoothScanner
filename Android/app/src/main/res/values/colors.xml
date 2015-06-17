@@ -4,4 +4,16 @@
     <color name="smokey_grey">#ff777777</color>
     <color name="brigh_orange">#ffbf7200</color>
     <color name="white">#ffffffff</color>
+    <color name="smartwave_blue">#005199</color>
+    <color name="smartwave_button_enabled">#01a0b6</color>
+    <color name="smartwave_cyan">#01a0b6</color>
+    <color name="smartwave_button_disabled">#99c1c6</color>
+    <color name="smartwave_button_disabled_text">#d9d9d9</color>
+    <color name="smartwave_button_pressed">#0078a7</color>
+    <color name="smartwave_button_focussed">#0078a7</color>
+    <color name="smartwave_white">#ffffff</color>
+    <color name="smartwave_red_enabled">#ed1c24</color>
+    <color name="smartwave_red_disabled">#cc8f8f</color>
+    <color name="smartwave_red_pressed">#990000</color>
+    <color name="comment_box">#f2f2f2</color>
 </resources>

@@ -3,16 +3,17 @@ package com.scanner.bth.http;
 import android.os.Environment;
 import android.util.Log;
 
-import com.scanner.bth.db.DbHelper;
+import com.scanner.bth.db.BthLog;
 import com.scanner.bth.db.Location;
 import com.scanner.bth.db.LocationDevice;
+import com.scanner.bth.db.LogEntry;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 
 public class Api {
@@ -37,6 +38,25 @@ public class Api {
          **/
         getMousetrapStorageDir("data.dat");
 
+    }
+
+    public static boolean uploadLogEntriesForLog(BthLog log, List<LogEntry> entries) {
+
+        for (LogEntry entry : entries) {
+            if (!entry.getLogId().toString().contentEquals(log.getUuid().toString())) {
+                throw new RuntimeException("attempting to upload a log with a log entry that doesn't belong to it");
+            }
+        }
+
+        if (DEMO) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return true;
     }
 
     public static ArrayList<Location> getAllLocations() {

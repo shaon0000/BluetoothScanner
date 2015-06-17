@@ -8,15 +8,10 @@
     <com.scanner.bth.bluetoothscanner.MouseIndicatorView
         android:id="@+id/status_indicator"
         android:layout_margin="10dp"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
         android:layout_gravity="center"/>
 
-    <View
-        android:layout_width="1dp"
-        android:layout_height="70dp"
-        android:layout_gravity="center"
-        android:background="@color/light_blue"/>
             <ImageView
                 android:id="@+id/bth_scan_result_finished_log_entry"
                 android:layout_width="wrap_content"
@@ -25,14 +20,13 @@
                 android:layout_margin="10dp"
                 android:background="@drawable/check"/>
             <TextView
-                android:layout_margin="10dp"
+
                 android:id="@+id/bth_scan_result_uuid"
+                android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:text="South-west corner"
-                android:textStyle="bold"
-                android:typeface="monospace"
                 android:gravity="center"
-                android:textSize="15dp"
+                android:textSize="9pt"
                 />
 </LinearLayout>

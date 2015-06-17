@@ -3,7 +3,7 @@ package com.scanner.bth.report;
 import com.scanner.bth.bluetoothscanner.BeaconParser;
 import com.scanner.bth.db.DbHelper;
 import com.scanner.bth.db.LocationDevice;
-import com.scanner.bth.db.Log;
+import com.scanner.bth.db.BthLog;
 import com.scanner.bth.db.LogEntry;
 
 import java.text.DateFormat;
@@ -20,7 +20,7 @@ import java.util.UUID;
 public class LogReport {
     private final UUID mLogId;
     private boolean locked = false;
-    private Log mLog;
+    private BthLog mLog;
 
     String mReportName;
 

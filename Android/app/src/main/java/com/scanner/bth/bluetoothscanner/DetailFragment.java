@@ -13,7 +13,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.scanner.bth.db.BthLog;
 import com.scanner.bth.db.DbHelper;
+
+import java.util.Date;
 
 
 /**
@@ -36,6 +39,7 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
     private String mOwner;
     private String mDeviceName;
     private int mPosition;
+    private BthLog mLog;
 
     private OnFragmentInteractionListener mListener;
     Button mFinishButton;
@@ -45,6 +49,10 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
     private TextView mPositionView;
     private BthScanResultsModel.ScanResult mScanResult;
     private ToggleButton mDeviceNotFound;
+    private TextView mDeviceLastChecked;
+    private TextView mPreviousMouseFound;
+    private TextView mCurrentMouseFound;
+    private Button mTechnicalDetailsButton;
 
     public static DetailFragment newInstance(
             Integer logEntryId, String owner, String deviceName, int position) {
@@ -72,6 +80,7 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
             mOwner = getArguments().getString(OWNER);
             mDeviceName = getArguments().getString(DEVICE_NAME);
             mPosition = mListener.getBthScanResultsModel().getPosition(mScanResult);
+            mLog = mListener.getLog();
         }
 
     }
@@ -87,14 +96,29 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
         mPositionView = (TextView) rootView.findViewById(R.id.fragment_detail_index);
         mStatusView = (MouseIndicatorView) rootView.findViewById(R.id.fragment_detail_status_indicator);
         mDeviceNotFound = (ToggleButton) rootView.findViewById(R.id.fragment_detail_device_not_found);
-
+        mDeviceLastChecked = (TextView) rootView.findViewById(R.id.detail_fragment_device_last_checked);
+        mPreviousMouseFound = (TextView) rootView.findViewById(R.id.detail_fragment_mouse_last_found);
+        mCurrentMouseFound = (TextView) rootView.findViewById(R.id.detail_fragment_mouse_current_mouse_found);
+        mTechnicalDetailsButton = (Button) rootView.findViewById(R.id.fragment_detail_technical_details_button);
         updateView();
 
+        mTechnicalDetailsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onTechnicalDetailsClick(mScanResult);
+            }
+        });
         mFinishButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new ConfirmTask(mMessageField.getText().toString()).execute();
-            }
+                if ((mScanResult.getStatus() & BthScanResultsModel.ScanResult.MOUSE_FOUND) != 0
+                        && (mMessageField.getText().toString().contentEquals("") && !mScanResult.getlogEntry().getShouldIgnore())) {
+                    Toast.makeText(getActivity(), "A comment is required", Toast.LENGTH_SHORT).show();
+                } else {
+                    new ConfirmTask(mMessageField.getText().toString()).execute();
+                }
+                }
+
         });
         mDeviceNotFound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -153,6 +177,14 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
         mMessageField.setText(mScanResult.getlogEntry().getMessage());
         int minor = Integer.valueOf(mScanResult.getBeaconData().getMinor());
 
+        if ((mScanResult.getStatus() & BthScanResultsModel.ScanResult.MOUSE_FOUND) == 0) {
+            mCurrentMouseFound.setText("N/A");
+        } else {
+            mCurrentMouseFound.setText(new Date(mScanResult.getlogEntry().getCurrentMouseEventTime()).toString());
+        }
+        mDeviceLastChecked.setText(new Date(mScanResult.getlogEntry().getDeviceLastChecked()).toString());
+        mPreviousMouseFound.setText(new Date(mScanResult.getlogEntry().getLastMouseEvent()).toString());
+
         mStatusView.setState(mScanResult.getStatus());
 
         // If we're searching or we're communicating, we can't type up a message.
@@ -168,6 +200,12 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
         } else {
             mMessageField.setEnabled(true);
             mDeviceNotFound.setEnabled(true);
+        }
+
+        if (mLog.getFinished()) {
+            mDeviceNotFound.setEnabled(false);
+            mMessageField.setEnabled(false);
+            mFinishButton.setEnabled(false);
         }
 
     }
@@ -191,6 +229,8 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
      */
     public interface OnFragmentInteractionListener {
         public BthScanResultsModel getBthScanResultsModel();
+        BthLog getLog();
+        public void onTechnicalDetailsClick(BthScanResultsModel.ScanResult mScanResult);
     }
 
     public class ConfirmTask extends BthScanResultsModel.BaseCommTask<Void, Void, Void> {
@@ -202,15 +242,16 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
 
         @Override
         public Void doInBackground(Void... params) {
-            Comm.sign(mScanResult.getlogEntry(), mScanResult.getDevice(), mOwner);
+            if (mScanResult.getlogEntry().getCurrentSigner() == null) {
+                Comm.sign(mScanResult.getlogEntry(), mScanResult.getDevice(), mOwner);
+            } else {
 
+            }
             return null;
         }
 
         @Override
         protected  void onPostExecute(Void result) {
-
-
             mMessageField.setEnabled(true);
             mScanResult.getlogEntry().setMessage(message);
             DbHelper.getInstance().updateLogEntry(mScanResult.getlogEntry());

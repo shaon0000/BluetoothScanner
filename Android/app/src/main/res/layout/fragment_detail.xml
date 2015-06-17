@@ -4,122 +4,175 @@
     android:orientation="vertical"
     android:layout_height="match_parent"
     android:layout_gravity="top"
-    android:padding="10dp"
     tools:context="com.scanner.bth.bluetoothscanner.DetailFragment">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="@color/smartwave_cyan">
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp">
+            <com.scanner.bth.bluetoothscanner.MouseIndicatorView
+                android:id="@+id/fragment_detail_status_indicator"
+                android:layout_centerInParent="true"
+                android:layout_width="50dp"
+                android:layout_height="50dp" />
+            <TextView
+                android:id="@+id/fragment_detail_index"
+                android:layout_centerInParent="true"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:text="3"
+                android:textSize="12pt"
+                android:textColor="@color/smartwave_white"
+                android:gravity="center"/>
+        </RelativeLayout>
 
-        <com.scanner.bth.bluetoothscanner.MouseIndicatorView
-            android:id="@+id/fragment_detail_status_indicator"
-            android:layout_width="50dp"
-            android:layout_height="50dp" />
-        <View
-            android:layout_width="1dp"
-            android:layout_height="50dp"
-            android:layout_gravity="bottom"
-            android:background="@color/light_blue"/>
-
-        <TextView
-            android:id="@+id/fragment_detail_index"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:text="3"
-            android:gravity="center"/>
-        <View
-            android:layout_width="1dp"
-            android:layout_height="50dp"
-            android:layout_gravity="bottom"
-            android:background="@color/light_blue"/>
         <TextView
             android:id="@+id/fragment_detail_device_name"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="South-west corner"
-            android:textStyle="bold"
-            android:typeface="monospace"
-            android:textSize="15dp"
-            android:gravity="center"/>
+            android:textSize="10pt"
+            android:gravity="center_vertical"
+            android:textColor="@color/smartwave_white"
+            android:paddingLeft="10dp"/>
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:layout_marginBottom="5dp"
-        android:background="@color/light_blue"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="5dp"
+        android:orientation="vertical"
+        android:padding="10dp"
         >
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="device last checked: "/>
+            android:text="device last checked: "
+            android:textSize="8pt"
+            android:textColor="@color/smartwave_blue"/>
         <TextView
             android:id="@+id/detail_fragment_device_last_checked"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="7pt"
             android:text="June 12, 2014, 5:19 pm"/>
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="5dp"
-        android:background="@color/light_blue"/>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="5dp"
+        android:orientation="vertical"
+        android:padding="10dp"
         >
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="mouse last found: "/>
+            android:text="mouse last found: "
+            android:textSize="8pt"
+            android:textColor="@color/smartwave_blue"/>
         <TextView
             android:id="@+id/detail_fragment_mouse_last_found"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textSize="7pt"
             android:text="June 12, 2014, 5:19 pm"/>
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginBottom="5dp"
-        android:background="@color/light_blue"/>
-    <ToggleButton
-        android:id="@+id/fragment_detail_device_not_found"
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_margin="10dp"
-        android:layout_height="25dp"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:textSize="10dp"
-        android:layout_gravity="center"
-        android:textColor="@android:color/white"
-        android:background="@android:color/holo_red_dark"
-        android:textOff="Flag Device for Repair"
-        android:textOn="Device Flagged As Broken"/>
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="current status: "
+            android:textSize="8pt"
+            android:textColor="@color/smartwave_blue"/>
+        <TextView
+            android:id="@+id/detail_fragment_mouse_current_mouse_found"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="7pt"
+            android:text="N/A"/>
+    </LinearLayout>
+
+    <ScrollView android:id="@+id/comment_form"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_gravity="bottom"
+        android:paddingBottom="10dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_gravity="bottom"
+            android:paddingBottom="10dp">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center">
+                <ToggleButton
+                    android:id="@+id/fragment_detail_device_not_found"
+                    android:layout_width="wrap_content"
+
+                    android:layout_height="wrap_content"
+
+                    android:textSize="7pt"
+                    android:layout_gravity="center"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/red_holo_button"
+                    android:textOff="Flag for Repair"
+                    android:layout_marginRight="15dp"
+                    android:textOn="Flagged As Broken"
+                    android:paddingLeft="15dp"
+                    android:paddingRight="15dp"
+                    style="@style/loginButtonStyle"/>
+                <Button
+                    android:id="@+id/fragment_detail_technical_details_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="7pt"
+                    android:layout_marginLeft="15dp"
+                    android:layout_gravity="center"
+                    android:text="Details"
+                    android:textColor="@color/white"
+                    android:textStyle="normal"
+                    android:background="@drawable/holo_button"
+                    style="@style/loginButtonStyle"/>
+
+            </LinearLayout>
     <EditText
         android:id="@+id/fragment_detail_message"
         android:layout_width="fill_parent"
         android:layout_height="150dp"
         android:layout_margin="15dp"
+        android:maxLines="4"
+        android:background="@color/comment_box"
         android:hint="Enter report coment here..."
         android:inputType="textMultiLine"/>
     <Button
         android:id="@+id/fragment_detail_finish_button"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Enter"/>
+        android:text="Enter"
+        android:textColor="@color/white"
+        android:textStyle="normal"
+        android:background="@drawable/holo_button"
+        style="@style/loginButtonStyle"/>
+    </LinearLayout>
+    </LinearLayout>
+    </ScrollView>
 
 
 </LinearLayout>

@@ -1,0 +1,6 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <solid
+        android:color="@color/smartwave_red_disabled"/>
+
+    <corners android:radius= "7dp" />
+</shape>

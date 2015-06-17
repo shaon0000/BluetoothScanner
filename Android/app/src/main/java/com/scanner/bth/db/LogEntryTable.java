@@ -20,6 +20,7 @@ public class LogEntryTable extends BaseTable<LogEntry> {
 
     public static final Column CURRENT_SIGNER = new Column("current_signer", Column.STRING);
     public static final Column CURRENT_DEVICE_CHECK_TIME = new Column("current_device_check_time", Column.LONG);
+    public static final Column CURRENT_MOUSE_EVENT = new Column("current_mouse_event", Column.LONG);
 
     public static final Column LAST_UPDATED = new Column("last_updated", Column.LONG);
     public static final Column LAST_SYNCED = new Column("last_synced", Column.LONG);
@@ -29,6 +30,8 @@ public class LogEntryTable extends BaseTable<LogEntry> {
 
     // If this is true, it indicates that the user thought the device was broken.
     public static final Column SHOULD_IGNORE = new Column("should_ignore", Column.BOOLEAN).setNotNull();
+
+    public static final Column BATTERY_LEVEL = new Column("battery_level", Column.INTEGER).setNotNull();
 
     private static final ArrayList<Column> mColumns = new ArrayList<>();
 
@@ -44,6 +47,7 @@ public class LogEntryTable extends BaseTable<LogEntry> {
         mColumns.add(LAST_SIGNER);
         mColumns.add(CURRENT_SIGNER);
         mColumns.add(CURRENT_DEVICE_CHECK_TIME);
+        mColumns.add(CURRENT_MOUSE_EVENT);
 
         mColumns.add(TIME_CREATED);
         mColumns.add(LAST_UPDATED);
@@ -51,6 +55,7 @@ public class LogEntryTable extends BaseTable<LogEntry> {
         mColumns.add(MESSAGE);
 
         mColumns.add(SHOULD_IGNORE);
+        mColumns.add(BATTERY_LEVEL);
     }
 
 
@@ -77,6 +82,7 @@ public class LogEntryTable extends BaseTable<LogEntry> {
         values.put(LAST_SIGNER.getKey(), obj.getLastSigner());
         values.put(CURRENT_SIGNER.getKey(), obj.getCurrentSigner());
         values.put(CURRENT_DEVICE_CHECK_TIME.getKey(), obj.getCurrentDeviceCheckTime());
+        values.put(CURRENT_MOUSE_EVENT.getKey(), obj.getCurrentMouseEventTime());
 
         values.put(TIME_CREATED.getKey(), obj.getTimeCreated());
         values.put(LAST_UPDATED.getKey(), obj.getLastUpdated());
@@ -84,6 +90,7 @@ public class LogEntryTable extends BaseTable<LogEntry> {
 
         values.put(MESSAGE.getKey(), obj.getMessage());
         values.put(SHOULD_IGNORE.getKey(), obj.getShouldIgnore());
+        values.put(BATTERY_LEVEL.getKey(), obj.getBatteryLevel());
         return values;
     }
 
@@ -108,10 +115,11 @@ public class LogEntryTable extends BaseTable<LogEntry> {
         String message = (String) extract(MESSAGE, cursor);
 
         Boolean shouldIgnore = (Boolean) extract(SHOULD_IGNORE, cursor);
-
+        Long currentMouseEventTime = (Long) extract(CURRENT_MOUSE_EVENT, cursor);
+        Integer batteryLevel = (Integer) extract(BATTERY_LEVEL, cursor);
         return new LogEntry(id, logId, byteRecord, deviceLastChecked, lastMouseEvent,
                 lastSigner, currentSigner, lastUpdated, lastSynced,
-                currentDeviceCheckTime, timeCreated, message, shouldIgnore);
+                currentDeviceCheckTime, timeCreated, message, shouldIgnore, currentMouseEventTime, batteryLevel);
     }
 
     public static LogEntryTable getSingleton() {

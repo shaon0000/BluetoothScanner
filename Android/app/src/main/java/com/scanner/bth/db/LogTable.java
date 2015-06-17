@@ -11,7 +11,7 @@ import java.util.UUID;
  *
  * Represents a SQL LogTable that can be used to serialize/deserialize Log objects into SQL objects.
  */
-public class LogTable extends BaseTable<Log> {
+public class LogTable extends BaseTable<BthLog> {
 
     public static final Column _UUID = new Column("uuid", Column.UUID);
     public static final Column TIME_CREATED = new Column("time_created", Column.LONG);
@@ -46,7 +46,7 @@ public class LogTable extends BaseTable<Log> {
     }
 
     @Override
-    public ContentValues serialize(Log obj) {
+    public ContentValues serialize(BthLog obj) {
         ContentValues values = new ContentValues();
         values.put(_UUID.getKey(), obj.getUuid().toString());
         values.put(TIME_CREATED.getKey(), obj.getTimeCreated());
@@ -59,7 +59,7 @@ public class LogTable extends BaseTable<Log> {
     }
 
     @Override
-    public Log deserialize(Cursor cursor) {
+    public BthLog deserialize(Cursor cursor) {
         UUID id = (UUID) extract(_UUID, cursor);
         Long timeCreated = (Long) extract(TIME_CREATED, cursor);
         Long lastUpdated = (Long) extract(LAST_UPDATED, cursor);
@@ -68,7 +68,7 @@ public class LogTable extends BaseTable<Log> {
         Boolean finished = (Boolean) extract(FINISHED, cursor);
         Long locationId = (Long) extract(LOCATION_ID, cursor);
 
-        return new Log(id, timeCreated, lastUpdated, owner, lastSynced, finished, locationId);
+        return new BthLog(id, timeCreated, lastUpdated, owner, lastSynced, finished, locationId);
     }
 
     public static LogTable getSingleton() {

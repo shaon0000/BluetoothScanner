@@ -1,11 +1,9 @@
 package com.scanner.bth.bluetoothscanner;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Handler;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
@@ -18,25 +16,29 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.ProgressBar;
 
+import com.scanner.bth.db.BthLog;
 import com.scanner.bth.db.DbHelper;
 import com.scanner.bth.db.Location;
 import com.scanner.bth.db.LocationDevice;
 import com.scanner.bth.db.LogEntry;
 
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 
 public class ScannerActivity extends ActionBarActivity implements
         ItemFragment.OnFragmentInteractionListener, DetailFragment.OnFragmentInteractionListener,
-        ReportFragment.OnFragmentInteractionListener {
+        ReportFragment.OnFragmentInteractionListener, TechnicalDetailFragment.OnFragmentInteractionListener {
 
     // Used to update information about said device.
     public static final String LOG_ID_EXTRA = "com.scanner.bth.bluetoothscanner.MainActivity.LOG_ID_EXTRA";
 
     // Used to grab devices to pre-populate the list
     public static final String INTENT_EXTRA_LOCATION_ID = "com.scanner.bth.bluetoothscanner.MainActivity.location_id";
+    private static final String TAG_TECH_FRAGMENT = "bth_technical_fragment";
 
     private BluetoothAdapter mBluetoothAdapter;
     private BthScanModel mScanModel;
@@ -52,13 +54,53 @@ public class ScannerActivity extends ActionBarActivity implements
     private MenuItem mStopScanButton;
     private long mLocationId;
     private String mLogId;
-    com.scanner.bth.db.Log mLog;
+    BthLog mLog;
     private BthScanResultsModel mScanResultModel;
     private Location mLocation;
 
     @Override
     public BthScanResultsModel getBthScanResultsModel() {
         return mScanResultModel;
+    }
+
+    @Override
+    public boolean isScanning() {
+        return mScanModel.isScanning();
+    }
+
+    @Override
+    public BthLog getLog() {
+        return mLog;
+    }
+
+    @Override
+    public void onTechnicalDetailsClick(BthScanResultsModel.ScanResult mScanResult) {
+        int major = -1;
+        int minor = -1;
+        int battery = -1;
+        int range = -1;
+        if (mScanResult.getlogEntry().getCurrentSigner() != null) {
+            // If this device was signed, it means our data is recorded.
+            major = Integer.valueOf(mScanResult.getBeaconData().getMajor());
+            minor = Integer.valueOf(mScanResult.getBeaconData().getMinor());
+            battery = Integer.valueOf(mScanResult.getlogEntry().getBatteryLevel());
+            range = Integer.valueOf(new Random().nextInt(3));
+        } else if (mScanResult.noDevice()) {
+
+        } else {
+            major = Integer.valueOf(mScanResult.getBeaconData().getMajor());
+            minor = Integer.valueOf(mScanResult.getBeaconData().getMinor());
+            battery = Integer.valueOf(mScanResult.getlogEntry().getBatteryLevel());
+            range = Integer.valueOf(new Random().nextInt(3));
+        }
+
+        String uuid = mScanResult.getBeaconData().getProximity_uuid();
+        TechnicalDetailFragment techFragment = TechnicalDetailFragment.newInstance(uuid, major, minor, battery, range);
+
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, techFragment)
+                .addToBackStack(TAG_TECH_FRAGMENT)
+                .commit();
     }
 
     @Override
@@ -84,13 +126,22 @@ public class ScannerActivity extends ActionBarActivity implements
         @Override
         public void onScanStart() {
             Log.d("SCAN", "Starting to scan");
-            // update the list everytime we scan.
+            mScanResultFragment.scanStarted();
         }
 
         @Override
         public void onScanFinish() {
             Log.d("SCAN", "Finished a scan");
-            // if we have any animations, we should stop them.
+            mScanResultFragment.scanStopped();
+        }
+
+        @Override
+        public void onVirtualScan(byte[] record) {
+            if (BthScanModel.SPOOF_DEVICES) {
+                BthScanResultsModel.ScanResult scanResult = new BthScanResultsModel.ScanResult(record, new VirtualBthScanner.DemoBthDevice(BeaconParser.bytesToHex(record)));
+                mScanResultModel.addDevice(scanResult);
+            }
+
         }
     };
 
@@ -105,7 +156,6 @@ public class ScannerActivity extends ActionBarActivity implements
         mLogId = getIntent().getExtras().getString(ScannerActivity.LOG_ID_EXTRA);
         mLog = DbHelper.getInstance().getLog(UUID.fromString(mLogId));
         mLocationId = mLog.getLocationId();
-
 
         mLocation = DbHelper.getInstance().getLocation(mLog.getLocationId());
         if (mScanResultFragment == null) {
@@ -153,7 +203,6 @@ public class ScannerActivity extends ActionBarActivity implements
             });
 
         }
-
     }
 
     @Override
@@ -170,6 +219,11 @@ public class ScannerActivity extends ActionBarActivity implements
         mStartScanButton = menu.findItem(R.id.action_search);
         mStopScanButton = menu.findItem(R.id.action_stop_search);
         mStopScanButton.setVisible(false);
+
+        if (mLog.getFinished()) {
+            mStartScanButton.setVisible(false);
+            mStopScanButton.setVisible(false);
+        }
         return true;
     }
 

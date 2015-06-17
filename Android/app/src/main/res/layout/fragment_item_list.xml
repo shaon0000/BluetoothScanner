@@ -1,24 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.scanner.bth.bluetoothscanner.ItemFragment">
     <LinearLayout
+        android:id="@+id/fragment_item_location_bar"
+        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:orientation="horizontal"
+        android:background="@color/smartwave_cyan"
         >
-
+        <!-- Login progress -->
+        <ProgressBar android:id="@+id/scan_progress" style="?android:attr/progressBarStyleLarge"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
+            android:gravity="center_vertical"
+            android:visibility="invisible"
+            />
         <TextView
             android:id="@+id/fragment_item_list_log_location"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center"
+            android:gravity="center_vertical"
+            android:paddingLeft="10dp"
             android:text="Riverrun"
-            android:textSize="15dp"
-            android:textStyle="bold"
-            android:typeface="monospace"
+            android:textSize="10pt"
+            android:textColor="@color/smartwave_white"
+            android:fontFamily="sans-serif-thin"
             android:layout_weight="1"/>
         <Button
             android:id="@+id/fragment_item_list_complete_log"
@@ -27,14 +38,19 @@
             android:layout_weight="0"
             android:text="Finish"/>
     </LinearLayout>
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:background="@color/light_blue"/>
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/fragment_item_location_bar"
+        android:layout_above="@+id/fragment_item_logo"
         />
-
-</LinearLayout>
+    <ImageView
+        android:id="@+id/fragment_item_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/app_logo"
+        android:layout_margin="25dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"/>
+</RelativeLayout>

@@ -16,8 +16,8 @@ public class MouseIndicatorView extends StatusIndicatorView {
 
     @Override
     public void initMap() {
-        indicatorMap.put(BthScanResultsModel.ScanResult.MOUSE_FOUND, Color.GREEN);
-        indicatorMap.put(BthScanResultsModel.ScanResult.NO_MOUSE, Color.RED);
+        indicatorMap.put(BthScanResultsModel.ScanResult.MOUSE_FOUND, Color.RED);
+        indicatorMap.put(BthScanResultsModel.ScanResult.NO_MOUSE, Color.GREEN);
         indicatorMap.put(BthScanResultsModel.ScanResult.SEARCHING, Color.GRAY);
         indicatorMap.put(BthScanResultsModel.ScanResult.COMM, Color.CYAN);
     }

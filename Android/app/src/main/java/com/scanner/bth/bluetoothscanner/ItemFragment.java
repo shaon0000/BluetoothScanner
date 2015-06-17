@@ -16,6 +16,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 /**
@@ -44,6 +45,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
     private TextView mLogNameView;
     private Button mFinishButton;
     private String mLocationName;
+    private ProgressBar mScanProgress;
 
     @Override
     public void updateView() {
@@ -54,7 +56,14 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
             mFinishButton.setEnabled(false);
         }
 
+        if (mListener.isScanning()) {
+            mScanProgress.setVisibility(View.VISIBLE);
+        } else {
+            mScanProgress.setVisibility(View.INVISIBLE);
+        }
+
         mLogNameView.setText(mLocationName);
+
     }
 
     @Override
@@ -169,7 +178,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         mListView = (AbsListView) view.findViewById(android.R.id.list);
         mLogNameView = (TextView) view.findViewById(R.id.fragment_item_list_log_location);
         mFinishButton = (Button) view.findViewById(R.id.fragment_item_list_complete_log);
-
+        mScanProgress = (ProgressBar) view.findViewById(R.id.scan_progress);
         mFinishButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -205,6 +214,13 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         mListener = null;
     }
 
+    public void scanStarted() {
+        mScanProgress.setVisibility(View.VISIBLE);
+    }
+
+    public void scanStopped() {
+        mScanProgress.setVisibility(View.INVISIBLE);
+    }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -227,6 +243,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         // TODO: Update argument type and name
         public void onClickDevice(BthScanResultsModel.ScanResult result);
         public BthScanResultsModel getBthScanResultsModel();
+        public boolean isScanning();
         void generateReport();
     }
 }

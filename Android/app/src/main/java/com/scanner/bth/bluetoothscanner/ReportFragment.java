@@ -1,10 +1,9 @@
 package com.scanner.bth.bluetoothscanner;
 
 import android.app.Activity;
-import android.net.Uri;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +11,12 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.scanner.bth.db.DbHelper;
-import com.scanner.bth.db.Log;
+import com.scanner.bth.db.BthLog;
 import com.scanner.bth.report.LogReport;
 
 import java.util.UUID;
+
+import static com.scanner.bth.bluetoothscanner.ScannerActivity.LOG_ID_EXTRA;
 
 
 /**
@@ -43,7 +44,7 @@ public class ReportFragment extends Fragment {
     private TextView mReportContentView;
     private LogReport mReportBuilder;
     private Button mCloseButton;
-    private Log mLog;
+    private BthLog mLog;
 
     /**
      * Use this factory method to create a new instance of
@@ -98,6 +99,9 @@ public class ReportFragment extends Fragment {
         mCloseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent data = new Intent();
+                data.putExtra(LOG_ID_EXTRA, mLog.getUuid().toString());
+                getActivity().setResult(Activity.RESULT_OK, data);
                 getActivity().finish();
             }
         });

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,16 +18,23 @@ import android.widget.TextView;
 
 import com.scanner.bth.db.DbHelper;
 import com.scanner.bth.db.Location;
-import com.scanner.bth.db.Log;
+import com.scanner.bth.db.BthLog;
 import com.scanner.bth.db.LogTable;
 
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.UUID;
+
+import static com.scanner.bth.bluetoothscanner.ScannerActivity.LOG_ID_EXTRA;
 
 
 public class LogListActivity extends ActionBarActivity {
+
+    public static final String LOCATION_ID = "com.scanner.bth.bluetoothscannner.location_id";
+    private static final int SCANNER_ACTIVITY = 1;
+    LogListAdapater mAdapter;
 
     // Pull all logs from database
     // Let user select a log.
@@ -35,17 +43,18 @@ public class LogListActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_list);
         ListView listView = (ListView) findViewById(R.id.activity_log_list_view);
-        final List<Log> logs = DbHelper.getInstance().getLogs(LogTable.TIME_CREATED, false);
-        LogListAdapater adapter = new LogListAdapater(logs, this);
-        listView.setAdapter(adapter);
+        long locationId = getIntent().getExtras().getLong(LogListActivity.LOCATION_ID);
+        final List<BthLog> logs = DbHelper.getInstance().getLogsForLocation(locationId, LogTable.TIME_CREATED, false);
+        mAdapter = new LogListAdapater(logs, this);
+        listView.setAdapter(mAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(LogListActivity.this, ScannerActivity.class);
-                intent.putExtra(ScannerActivity.LOG_ID_EXTRA, logs.get(position).getUuid().toString());
-                startActivity(intent);
+                intent.putExtra(LOG_ID_EXTRA, logs.get(position).getUuid().toString());
+                startActivityForResult(intent, SCANNER_ACTIVITY);
             }
         });
     }
@@ -75,12 +84,22 @@ public class LogListActivity extends ActionBarActivity {
 
     public class LogListAdapater extends BaseAdapter {
 
-        List<Log> logList;
+        List<BthLog> logList;
         Context context;
 
-        public LogListAdapater(List<Log> logList, Context context) {
+        public LogListAdapater(List<BthLog> logList, Context context) {
             this.context = context;
             this.logList = logList;
+        }
+
+        public void updateLog(UUID logId) {
+            for (int i = 0; i < logList.size(); i++) {
+                BthLog log = logList.get(i);
+                if (log.getUuid().compareTo(logId) == 0) {
+                    logList.set(i, DbHelper.getInstance().getLog(logId));
+                }
+            }
+            notifyDataSetChanged();
         }
 
         @Override
@@ -109,7 +128,7 @@ public class LogListActivity extends ActionBarActivity {
                 rootView = inflater.inflate(R.layout.log_list_item, parent, false);
             }
 
-            Log item = (Log) getItem(position);
+            BthLog item = (BthLog) getItem(position);
             Location location = DbHelper.getInstance().getLocation(item.getLocationId());
             boolean synced = item.getLastUpdated() < item.getLastSynced();
             boolean finished = item.getFinished();
@@ -129,6 +148,9 @@ public class LogListActivity extends ActionBarActivity {
 
             timeCreatedView.setText(format.format(new Date(item.getTimeCreated())));
 
+                Log.d("TAG", "synced : " + format.format(new Date(item.getLastSynced())).toString());
+                Log.d("TAG", "updated: " + format.format(new Date(item.getLastUpdated())).toString());
+
             if (synced) {
                 syncView.setImageResource(R.drawable.uploaded);
             } else {
@@ -142,6 +164,16 @@ public class LogListActivity extends ActionBarActivity {
             }
 
             return rootView;
+        }
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("LogListActivity", "back from activity");
+        if (requestCode == SCANNER_ACTIVITY && resultCode == RESULT_OK) {
+            Log.d("LogListActivity", "result was ok");
+            UUID logId = UUID.fromString(data.getExtras().getString(LOG_ID_EXTRA));
+
+            mAdapter.updateLog(logId);
         }
     }
 }

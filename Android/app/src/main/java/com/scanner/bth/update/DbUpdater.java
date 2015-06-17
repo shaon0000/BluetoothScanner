@@ -2,6 +2,7 @@ package com.scanner.bth.update;
 
 import android.bluetooth.BluetoothClass;
 import android.content.Context;
+import android.util.Log;
 
 import com.scanner.bth.db.DbHelper;
 import com.scanner.bth.db.Location;
@@ -17,6 +18,7 @@ import java.util.List;
 public class DbUpdater {
     public static void updateDatabaseWithLocations(Context context) {
         ArrayList<Location> locations = Api.getAllLocations();
+        Log.d("DbUpdater","locations: " + locations.size());
         DbHelper dbHelper = DbHelper.getInstance();
         dbHelper.deleteAllLocations();
         dbHelper.addLocations(locations);
@@ -24,6 +26,10 @@ public class DbUpdater {
 
     public static void updateDatabaseWithDevices(Context context, Location location) {
         ArrayList<LocationDevice> devices = Api.getDevicesForLocation(location);
+        for (LocationDevice device: devices) {
+            Log.d("DbUpdater", device.getLocationId() + " " + device.getName() + " " + device.getUuid());
+        }
+        Log.d("DbUpdater","devices for " + location.getAddress() + ": " + devices.size());
         DbHelper.getInstance().deleteDevicesForLocation(location);
 
         if(DbHelper.getInstance().getLocalLocationDevices(location).size() != 0) {

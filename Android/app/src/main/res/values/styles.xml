@@ -2,7 +2,36 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+        <item name="android:actionBarStyle">@style/SmartwaveActionBar</item>
     </style>
 
+<!-- Base application theme. -->
+<style name="HoloTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <!-- Customize your theme here. -->dw
+    <item name="colorControlNormal">#80FFFFFF</item>
+    <item name="colorControlActivated">#FFFFFF</item>
+    <item name="colorControlHighlight">#FFFFFF</item>
+</style>
+    <!-- Base application theme. -->
+    <style name="SwTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->dw
+        <item name="colorControlNormal">#80005199</item>
+        <item name="colorControlActivated">#005199</item>
+        <item name="colorControlHighlight">#005199</item>
+    </style>
+    <!-- the theme applied to the application or activity -->
+    <style name="ScannerSmartwaveBarTheme"
+        parent="@style/Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:actionBarStyle">@style/SmartwaveActionBar</item>
+        <item name="actionBarStyle">@style/SmartwaveActionBar</item>
+    </style>
+    <style name="loginButtonStyle">
+        <item name="android:textColor">@drawable/holo_button_text</item>
+    </style>
+    <!-- ActionBar styles -->
+    <style name="SmartwaveActionBar"
+        parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@color/smartwave_blue</item>
+        <item name="background">@color/smartwave_blue</item>
+    </style>
 </resources>
