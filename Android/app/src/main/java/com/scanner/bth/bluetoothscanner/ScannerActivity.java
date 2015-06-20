@@ -31,7 +31,7 @@ import java.util.UUID;
 
 public class ScannerActivity extends ActionBarActivity implements
         ItemFragment.OnFragmentInteractionListener, DetailFragment.OnFragmentInteractionListener,
-        ReportFragment.OnFragmentInteractionListener, TechnicalDetailFragment.OnFragmentInteractionListener {
+        ReportFragment.OnFragmentInteractionListener, TechnicalDetailFragment.OnFragmentInteractionListener, SmokeScreenFragment.OnFragmentInteractionListener {
 
     // Used to update information about said device.
     public static final String LOG_ID_EXTRA = "com.scanner.bth.bluetoothscanner.MainActivity.LOG_ID_EXTRA";
@@ -49,6 +49,7 @@ public class ScannerActivity extends ActionBarActivity implements
     private static final String TAG_LIST_FRAGMENT = "bth_list_fragment";
     private static final String TAG_DETAIL_FRAGMENT = "bth_detail_framgment";
     private static final String TAG_REPORT_FRAGMENT = "bth_report_fragment";
+    private static final String SMOKE_SCREEN_FRAGMENT = "smoke_screen_fragment";
 
     private MenuItem mStartScanButton;
     private MenuItem mStopScanButton;
@@ -57,6 +58,7 @@ public class ScannerActivity extends ActionBarActivity implements
     BthLog mLog;
     private BthScanResultsModel mScanResultModel;
     private Location mLocation;
+    private SmokeScreenFragment mSmokeFragment;
 
     @Override
     public BthScanResultsModel getBthScanResultsModel() {
@@ -98,7 +100,7 @@ public class ScannerActivity extends ActionBarActivity implements
         TechnicalDetailFragment techFragment = TechnicalDetailFragment.newInstance(uuid, major, minor, battery, range);
 
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, techFragment)
+                .add(R.id.container, techFragment)
                 .addToBackStack(TAG_TECH_FRAGMENT)
                 .commit();
     }
@@ -107,7 +109,8 @@ public class ScannerActivity extends ActionBarActivity implements
     public void generateReport() {
         ReportFragment reportFragment = ReportFragment.newInstance(UUID.fromString(mLogId));
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, reportFragment)
+                .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                .add(R.id.container, reportFragment)
                         // Add this transaction to the back stack
                 .addToBackStack(TAG_REPORT_FRAGMENT)
                 .commit();
@@ -158,11 +161,11 @@ public class ScannerActivity extends ActionBarActivity implements
         mLocationId = mLog.getLocationId();
 
         mLocation = DbHelper.getInstance().getLocation(mLog.getLocationId());
-        if (mScanResultFragment == null) {
-
-            mScanResultFragment = ItemFragment.newInstance(mLocation.getAddress());
+        if (mSmokeFragment == null) {
+            mSmokeFragment = SmokeScreenFragment.newInstance();
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, mScanResultFragment, TAG_LIST_FRAGMENT)
+                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                    .add(R.id.container, mSmokeFragment)
                     .commit();
         }
 
@@ -191,13 +194,17 @@ public class ScannerActivity extends ActionBarActivity implements
             final List<LocationDevice> devices = DbHelper.getInstance().getLocalLocationDevices(new Location(mLocationId, null, null));
             final List<LogEntry> logEntries = DbHelper.getInstance().getLogEntries(mLog, null, false);
             Log.d(ScannerActivity.class.getSimpleName(), "device count: " + devices.size());
+            Log.d(ScannerActivity.class.getSimpleName(), "log entry count: " + logEntries.size());
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {
+                    Log.d("ScannerActivity", "prepulating data");
                     for (LogEntry entry : logEntries) {
+                        Log.d(ScannerActivity.class.getSimpleName(),entry.getId().toString());
                         BeaconParser.BeaconData data = BeaconParser.read(entry.getByteRecord());
                         LocationDevice device = DbHelper.getInstance().getLocationDevice(mLocationId, data.getProximity_uuid());
                         mScanResultModel.prePopulate(entry, device);
+
                     }
                 }
             });
@@ -219,6 +226,7 @@ public class ScannerActivity extends ActionBarActivity implements
         mStartScanButton = menu.findItem(R.id.action_search);
         mStopScanButton = menu.findItem(R.id.action_stop_search);
         mStopScanButton.setVisible(false);
+        mStartScanButton.setVisible(false);
 
         if (mLog.getFinished()) {
             mStartScanButton.setVisible(false);
@@ -266,7 +274,8 @@ public class ScannerActivity extends ActionBarActivity implements
     public void onClickDevice(BthScanResultsModel.ScanResult result) {
         DetailFragment detailFragment = DetailFragment.newInstance(result.getlogEntry().getId(), "test", result.getLocationDevice().getName(), 0);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, detailFragment)
+                .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                .add(R.id.container, detailFragment)
                         // Add this transaction to the back stack
                 .addToBackStack(TAG_DETAIL_FRAGMENT)
                 .commit();
@@ -275,6 +284,23 @@ public class ScannerActivity extends ActionBarActivity implements
     @Override
     public void reportFinished() {
         mScanResultModel.completeLog();
+    }
+
+    @Override
+    public void finishedFakeScreen() {
+        if (mScanResultFragment == null) {
+            mScanResultFragment = ItemFragment.newInstance(mLocation.getAddress());
+        }
+
+        getSupportFragmentManager().beginTransaction()
+                .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                .remove(mSmokeFragment)
+                .add(R.id.container, mScanResultFragment, TAG_LIST_FRAGMENT)
+                .commit();
+
+        if (!mLog.getFinished()) {
+            mStartScanButton.setVisible(true);
+        }
     }
 
     /**

@@ -167,8 +167,11 @@ public class Api {
                         continue;
                     }
 
-                    String[] values =  line.split(",");
+                    String[] values =  line.split(",,");
                     if (values.length > 2) {
+                        for (int i = 0; i < values.length; i++) {
+                            Log.d("Api", values[i]);
+                        }
                         throw new RuntimeException("too many values found in a row, line " + lineNum);
                     }
 

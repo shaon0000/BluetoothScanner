@@ -41,7 +41,8 @@
         </activity>
         <activity
             android:name=".LogListActivity"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait"
+            android:theme="@style/ScannerSmartwaveBarTheme">
         </activity>
         <activity
             android:name=".ScannerActivity"

@@ -49,9 +49,10 @@ public class LocationFragment extends ListFragment {
         }
 
         locations = DbHelper.getInstance().getAllLocations();
-        // TODO: Change Adapter to display your content
-        setListAdapter(new ArrayAdapter<Location>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, locations));
+            // TODO: Change Adapter to display your content
+            setListAdapter(new ArrayAdapter<Location>(getActivity(),
+                    android.R.layout.simple_list_item_1, android.R.id.text1, locations));
+
     }
 
 

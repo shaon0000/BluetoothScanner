@@ -7,15 +7,13 @@
 
 <!-- Base application theme. -->
 <style name="HoloTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-    <!-- Customize your theme here. -->dw
     <item name="colorControlNormal">#80FFFFFF</item>
     <item name="colorControlActivated">#FFFFFF</item>
     <item name="colorControlHighlight">#FFFFFF</item>
 </style>
     <!-- Base application theme. -->
     <style name="SwTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->dw
-        <item name="colorControlNormal">#80005199</item>
+        <item name="colorControlNormal">#005199</item>
         <item name="colorControlActivated">#005199</item>
         <item name="colorControlHighlight">#005199</item>
     </style>

@@ -47,7 +47,9 @@ public class LogListActivity extends ActionBarActivity {
         final List<BthLog> logs = DbHelper.getInstance().getLogsForLocation(locationId, LogTable.TIME_CREATED, false);
         mAdapter = new LogListAdapater(logs, this);
         listView.setAdapter(mAdapter);
-
+        TextView locationView = (TextView) findViewById(R.id.log_list_location_name);
+        Location location = DbHelper.getInstance().getLocation(locationId);
+        locationView.setText(location.getAddress());
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -139,12 +141,9 @@ public class LogListActivity extends ActionBarActivity {
 
             ImageView syncView =  (ImageView) rootView.findViewById(R.id.log_list_item_synced);
             ImageView finishView = (ImageView) rootView.findViewById(R.id.log_list_item_finished);
-            TextView log_title = (TextView) rootView.findViewById(R.id.log_list_address);
 
             TextView timeCreatedView = (TextView) rootView.findViewById(
                     R.id.log_list_item_time_created);
-
-            log_title.setText(location.getAddress());
 
             timeCreatedView.setText(format.format(new Date(item.getTimeCreated())));
 

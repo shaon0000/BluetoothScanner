@@ -1,13 +1,17 @@
 package com.scanner.bth.bluetoothscanner;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 
 /**
@@ -43,15 +47,29 @@ public class SmokeScreenFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_smoke_screen, container, false);
-    }
 
+        View rootView = inflater.inflate(R.layout.fragment_smoke_screen, container, false);
+        WebView wv = (WebView) rootView.findViewById(R.id.smoke_web_view);
+        wv.getSettings().setDefaultZoom(WebSettings.ZoomDensity.FAR);
+        wv.setWebViewClient(new WebViewController());
+        wv.setBackgroundColor(Color.TRANSPARENT);
+        wv.loadDataWithBaseURL("file:///android_asset/", "<html><center><img src=\"earth_spinning.gif\"></html>", "text/html", "utf-8", "");
+        return rootView;
+    }
+    private class WebViewController extends WebViewClient {
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            view.loadUrl(url);
+            return true;
+        }
+    }
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -67,7 +85,7 @@ public class SmokeScreenFragment extends Fragment {
             }
         };
 
-        mHandler.postDelayed(mSmokeRun, 3000);
+        mHandler.postDelayed(mSmokeRun, 5000);
 
         try {
             mListener = (OnFragmentInteractionListener) activity;

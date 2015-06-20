@@ -37,7 +37,23 @@
         android:columnCount="3"
 
         android:background="@color/smartwave_white">
+        <Button
+            android:id="@+id/flow_pick_sync"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
 
+            android:background="@drawable/sync_button"
+            />
+        <Button
+            android:id="@+id/flow_pick_logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/logout_button"/>
+        <Button
+            android:id="@+id/flow_pick_about"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/about_button"/>
         <Button
             android:id="@+id/flow_pick_new_button"
             android:layout_width="wrap_content"
@@ -55,29 +71,15 @@
             android:background="@drawable/edit_account_button"
             />
 
-        <Button
-            android:id="@+id/flow_pick_sync"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
 
-            android:background="@drawable/sync_button"
-            />
 
         <Button
             android:id="@+id/flow_pick_download"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/new_user_button"/>
-        <Button
-            android:id="@+id/flow_pick_about"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/about_button"/>
-        <Button
-            android:id="@+id/flow_pick_logout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/logout_button"/>
+
+
     </GridLayout>
     </android.support.v7.widget.CardView>
     <LinearLayout

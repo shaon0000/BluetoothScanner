@@ -10,24 +10,19 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="@string/fragment_report_title"
-        android:textStyle="bold"
-        android:textSize="15dp"
-        android:typeface="monospace"
+        android:textColor="@color/smartwave_white"
+        android:textSize="10pt"
+        android:fontFamily="sans-serif"
+        android:background="@color/smartwave_cyan"
         android:gravity="center"/>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:background="@color/light_blue"/>
     <TextView
         android:padding="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textSize="8pt"
+        android:fontFamily="sans-serif"
         android:text="@string/fragment_report_summary_note"/>
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/light_blue"/>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -40,6 +35,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="1234 A St. Mousetrap Report"
+            android:fontFamily="sans-serif"
+            android:textSize="8pt"
             />
 
 
@@ -51,6 +48,9 @@
     android:text="@string/fragment_report_button_submit_report"
     android:layout_weight="0"
     android:layout_gravity="center"
+    android:layout_margin="10dp"
+    android:background="@drawable/holo_button"
+    android:textColor="@drawable/holo_button_text"
     android:visibility="gone"/>
 
 <Button
@@ -58,7 +58,10 @@
     android:layout_width="wrap_content"
     android:layout_height="50dp"
     android:layout_weight="0"
+    android:layout_margin="10dp"
     android:layout_gravity="center"
     android:text="@string/fragment_report_close_button"
+    android:background="@drawable/holo_button"
+    android:textColor="@drawable/holo_button_text"
     android:visibility="visible"/>
 </LinearLayout>

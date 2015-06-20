@@ -1,37 +1,27 @@
 package com.scanner.bth.bluetoothscanner;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.AccountManagerFuture;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.scanner.bth.auth.AuthHelper;
-import com.scanner.bth.auth.AuthLoginActivity;
-import com.scanner.bth.db.AccountDetails;
 import com.scanner.bth.db.DbHelper;
 import com.scanner.bth.db.Location;
 import com.scanner.bth.db.LocationDevice;
 import com.scanner.bth.update.DbUpdater;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
 
 public class FlowPickActivity extends Activity implements FlowPickFragment.OnFragmentInteractionListener,
-        LocationFragment.OnFragmentInteractionListener, SmokeScreenFragment.OnFragmentInteractionListener {
+        LocationFragment.OnFragmentInteractionListener {
     private static final String FLOW_PICK_FRAGMENT = "flow_pick_fragment";
     private static final String LOCATION_LIST_FRAGMENT = "location_list_fragment";
 
@@ -41,6 +31,9 @@ public class FlowPickActivity extends Activity implements FlowPickFragment.OnFra
     public static final String ACCOUNT = "shaon";
     public static final int AUTH_LOGIN = 1;
     private static final String SMOKE_SCREEN_FRAGMENT = "smoke_screen_fragment";
+    private static final int OLD_LOG_REQUEST_CODE = 2;
+    private static final int NEW_LOG_REQUEST_CODE = 3;
+
     // Instance fields
     Account mAccount;
 
@@ -79,29 +72,25 @@ public class FlowPickActivity extends Activity implements FlowPickFragment.OnFra
     }
 
     @Override
-    public void finishedFakeScreen() {
-        Log.d(FlowPickActivity.class.getSimpleName(), "finished fake screen");
-        intentSelect = IntentSelect.NEW_LOG;
-        LocationFragment locationFragment = LocationFragment.newInstance();
-        getFragmentManager().beginTransaction()
-                .replace(R.id.activity_flow_pick_container, locationFragment)
-                .addToBackStack(LOCATION_LIST_FRAGMENT)
-                .commit();
-    }
-
-    @Override
     public void onDownloadButtonClick() {
         new DownloadLocationAndDevicesTask().execute();
     }
 
     @Override
     public void onNewLogButtonClick() {
-        intentSelect = IntentSelect.SMOKE_SCREEN;
-        SmokeScreenFragment smokeFragment = SmokeScreenFragment.newInstance();
-        getFragmentManager().beginTransaction()
-                .replace(R.id.activity_flow_pick_container, smokeFragment)
-                .addToBackStack(SMOKE_SCREEN_FRAGMENT)
-                .commit();
+        intentSelect = IntentSelect.NEW_LOG;
+
+        List<Location> locations = DbHelper.getInstance().getAllLocations();
+        if (locations.size() == 1) {
+            onLocationPicked(locations.get(0));
+        } else {
+            LocationFragment locationFragment = LocationFragment.newInstance();
+            getFragmentManager().beginTransaction()
+                    .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
+                    .replace(R.id.activity_flow_pick_container, locationFragment)
+                    .addToBackStack(LOCATION_LIST_FRAGMENT)
+                    .commit();
+        }
 
     }
 
@@ -124,12 +113,17 @@ public class FlowPickActivity extends Activity implements FlowPickFragment.OnFra
     @Override
     public void onOldLogButtonClick() {
         intentSelect = IntentSelect.OLD_LOG;
-
-        LocationFragment locationFragment = LocationFragment.newInstance();
-        getFragmentManager().beginTransaction()
-                .replace(R.id.activity_flow_pick_container, locationFragment)
-                .addToBackStack(LOCATION_LIST_FRAGMENT)
-                .commit();
+        List<Location> locations = DbHelper.getInstance().getAllLocations();
+        if (locations.size() == 1) {
+            onLocationPicked(locations.get(0));
+        } else {
+            LocationFragment locationFragment = LocationFragment.newInstance();
+            getFragmentManager().beginTransaction()
+                    .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
+                    .replace(R.id.activity_flow_pick_container, locationFragment)
+                    .addToBackStack(LOCATION_LIST_FRAGMENT)
+                    .commit();
+        }
     }
 
     @Override
@@ -139,7 +133,7 @@ public class FlowPickActivity extends Activity implements FlowPickFragment.OnFra
             {
                 packagedIntent = new Intent(FlowPickActivity.this, LogListActivity.class);
                 packagedIntent.putExtra(LogListActivity.LOCATION_ID, location.getLocationId());
-                startActivity(packagedIntent);
+                startActivityForResult(packagedIntent, OLD_LOG_REQUEST_CODE);
                 break;
             }
             case NEW_LOG:
@@ -154,7 +148,7 @@ public class FlowPickActivity extends Activity implements FlowPickFragment.OnFra
                 }
 
                 packagedIntent.putExtra(ScannerActivity.LOG_ID_EXTRA, logUUID.toString());
-                startActivity(packagedIntent);
+                startActivityForResult(packagedIntent, NEW_LOG_REQUEST_CODE);
                 break;
             }
             default: {

@@ -3,6 +3,7 @@ package com.scanner.bth.bluetoothscanner;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.scanner.bth.auth.AuthHelper;
 import com.scanner.bth.db.BthLog;
 import com.scanner.bth.db.DbHelper;
 
@@ -76,6 +78,7 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
 
         if (getArguments() != null) {
             logEntryId = getArguments().getInt(LOG_ENTRY_ID);
+            Log.d("DetailFragment", "log id: " + logEntryId);
             mScanResult = mListener.getBthScanResultsModel().getScanResult(logEntryId);
             mOwner = getArguments().getString(OWNER);
             mDeviceName = getArguments().getString(DEVICE_NAME);
@@ -178,12 +181,22 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
         int minor = Integer.valueOf(mScanResult.getBeaconData().getMinor());
 
         if ((mScanResult.getStatus() & BthScanResultsModel.ScanResult.MOUSE_FOUND) == 0) {
-            mCurrentMouseFound.setText("N/A");
+            mCurrentMouseFound.setText("No mouse found");
         } else {
-            mCurrentMouseFound.setText(new Date(mScanResult.getlogEntry().getCurrentMouseEventTime()).toString());
+            mCurrentMouseFound.setText("Mouse found, " + AuthHelper.getUsername(getActivity()) + ", " + new Date(mScanResult.getlogEntry().getCurrentMouseEventTime()).toString());
         }
-        mDeviceLastChecked.setText(new Date(mScanResult.getlogEntry().getDeviceLastChecked()).toString());
-        mPreviousMouseFound.setText(new Date(mScanResult.getlogEntry().getLastMouseEvent()).toString());
+        if (mScanResult.getlogEntry().getDeviceLastChecked() == 0) {
+            mDeviceLastChecked.setText("Not checked yet");
+        } else {
+            mDeviceLastChecked.setText(new Date(mScanResult.getlogEntry().getDeviceLastChecked()).toString());
+        }
+        if (mScanResult.getlogEntry().getLastMouseEvent() == 0) {
+            mPreviousMouseFound.setText("Not connected to device");
+        } else {
+            mPreviousMouseFound.setText(new Date(mScanResult.getlogEntry().getLastMouseEvent()).toString());
+        }
+
+
 
         mStatusView.setState(mScanResult.getStatus());
 

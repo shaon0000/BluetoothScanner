@@ -68,7 +68,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
     @Override
     public void updateSingleItem(BthScanResultsModel.ScanResult result) {
-        mAdapter.notifyDataSetChanged();
+        updateView();
     }
 
     /**

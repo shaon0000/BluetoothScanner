@@ -1,13 +1,24 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:layout_height="match_parent"
     tools:context="com.scanner.bth.bluetoothscanner.LogListActivity">
+    <TextView
+        android:id="@+id/log_list_location_name"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentTop="true"
+        android:gravity="center_vertical"
+        android:paddingLeft="10dp"
+        android:text="Riverrun"
+        android:textSize="10pt"
+        android:textColor="@color/smartwave_white"
+        android:fontFamily="sans-serif"
+        android:orientation="horizontal"
+        android:background="@color/smartwave_cyan"/>
     <ListView
         android:id="@+id/activity_log_list_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></ListView>
+        android:layout_height="match_parent"
+        android:layout_below="@+id/log_list_location_name"></ListView>
 
 </RelativeLayout>

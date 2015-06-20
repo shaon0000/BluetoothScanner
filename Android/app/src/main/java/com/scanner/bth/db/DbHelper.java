@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.scanner.bth.CustomApplication;
+import com.scanner.bth.auth.AuthHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +50,7 @@ public class DbHelper extends SQLiteOpenHelper {
         db.execSQL(new LocationTable().sqlDeleteTable());
         db.execSQL(new LocationDeviceTable().sqlDeleteTable());
         db.execSQL(new AccountDetailsTable().sqlDeleteTable());
+
         onCreate(db);
     }
 

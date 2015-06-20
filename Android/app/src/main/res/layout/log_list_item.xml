@@ -1,33 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="100dp"
-    android:padding="10dp">
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:background="@color/smartwave_white"
+    >
     <!---
     - time_created
     - synced: uploaded on in queue symbol
     - completed: check-mark or X
     -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="10dp">
-        <TextView
-            android:id="@+id/log_list_address"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="1234 A St."
-            android:textStyle="bold"
-            android:textSize="20dp"/>
+
         <TextView
             android:id="@+id/log_list_item_time_created"
+            android:fontFamily="sans-serif"
+            android:textSize="9pt"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="4/2/2015"/>
-    </LinearLayout>
 
     <ImageView
         android:id="@+id/log_list_item_finished"

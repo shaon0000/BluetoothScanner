@@ -49,7 +49,7 @@ public class LogSyncAdapter extends AbstractThreadedSyncAdapter {
         mBuilder.setProgress(0, 0, true);
         List<BthLog> logs = DbHelper.getInstance().getLogs(LogTable.LAST_SYNC, true);
         Log.d("LogSyncAdapter", "performing sync");
-        mBuilder.setVibrate(new long [] {50, 1000, 100, 1000});
+
         for(BthLog log: logs) {
 
             Location location = DbHelper.getInstance().getLocation(log.getLocationId());
@@ -74,6 +74,9 @@ public class LogSyncAdapter extends AbstractThreadedSyncAdapter {
                 // Log has been in the system for seven days, should be deleted.
                 DbHelper.getInstance().deleteLog(log);
             }
+        }
+        if (logs.size() == 0) {
+            return;
         }
         mBuilder.setContentText("Sync complete");
         mBuilder.setProgress(0, 0, false);

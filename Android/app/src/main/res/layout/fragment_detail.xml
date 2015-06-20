@@ -4,10 +4,11 @@
     android:orientation="vertical"
     android:layout_height="match_parent"
     android:layout_gravity="top"
+    android:background="@color/smartwave_white"
     tools:context="com.scanner.bth.bluetoothscanner.DetailFragment">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:orientation="horizontal"
         android:background="@color/smartwave_cyan">
         <RelativeLayout
@@ -17,14 +18,15 @@
             <com.scanner.bth.bluetoothscanner.MouseIndicatorView
                 android:id="@+id/fragment_detail_status_indicator"
                 android:layout_centerInParent="true"
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
+                android:layout_width="40dp"
+                android:layout_height="40dp" />
             <TextView
                 android:id="@+id/fragment_detail_index"
                 android:layout_centerInParent="true"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:text="3"
+                android:fontFamily="sans-serif"
                 android:textSize="12pt"
                 android:textColor="@color/smartwave_white"
                 android:gravity="center"/>
@@ -37,6 +39,7 @@
             android:text="South-west corner"
             android:textSize="10pt"
             android:gravity="center_vertical"
+            android:fontFamily="sans-serif"
             android:textColor="@color/smartwave_white"
             android:paddingLeft="10dp"/>
     </LinearLayout>
@@ -51,13 +54,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="device last checked: "
-            android:textSize="8pt"
+            android:textSize="9pt"
             android:textColor="@color/smartwave_blue"/>
         <TextView
             android:id="@+id/detail_fragment_device_last_checked"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="7pt"
+            android:textSize="8pt"
             android:text="June 12, 2014, 5:19 pm"/>
     </LinearLayout>
 
@@ -71,13 +74,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="mouse last found: "
-            android:textSize="8pt"
+            android:textSize="9pt"
             android:textColor="@color/smartwave_blue"/>
         <TextView
             android:id="@+id/detail_fragment_mouse_last_found"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="7pt"
+            android:textSize="8pt"
             android:text="June 12, 2014, 5:19 pm"/>
     </LinearLayout>
     <LinearLayout
@@ -90,13 +93,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="current status: "
-            android:textSize="8pt"
+            android:textSize="9pt"
             android:textColor="@color/smartwave_blue"/>
         <TextView
             android:id="@+id/detail_fragment_mouse_current_mouse_found"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="7pt"
+            android:textSize="8pt"
             android:text="N/A"/>
     </LinearLayout>
 
@@ -157,8 +160,10 @@
         android:layout_height="150dp"
         android:layout_margin="15dp"
         android:maxLines="4"
-        android:background="@color/comment_box"
+        android:background="@color/smartwave_comment_box"
         android:hint="Enter report coment here..."
+        android:theme="@style/SwTheme"
+        android:padding="10dp"
         android:inputType="textMultiLine"/>
     <Button
         android:id="@+id/fragment_detail_finish_button"

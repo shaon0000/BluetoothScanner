@@ -24,8 +24,8 @@ public class AuthHelper {
         return sharedPref.getString(Constants.SharedPrefSettings.USERNAME, null);
     }
 
-    public static void logout(Activity activity) {
-        SharedPreferences sharedPref = activity.getSharedPreferences(
+    public static void logout(Context context) {
+        SharedPreferences sharedPref = context.getSharedPreferences(
                 Constants.SharedPrefSettings.FILENAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         String username = sharedPref.getString(Constants.SharedPrefSettings.USERNAME, null);
@@ -35,7 +35,7 @@ public class AuthHelper {
         
 
         Account account = new Account(username, FlowPickFragment.ACCOUNT_TYPE);
-        AccountManager.get(activity).removeAccount(account, null, null);
+        AccountManager.get(context).removeAccount(account, null, null);
 
     }
 

@@ -40,12 +40,12 @@ public class BthScanResultsModel {
 
     public ScanResult getScanResult(Integer logEntryId) {
         for (BthScanResultsModel.ScanResult result : bthList) {
-            if (result.getlogEntry().getId() == logEntryId) {
+            if (result.getlogEntry().getId().equals(logEntryId)) {
                 return result;
             }
         }
 
-        throw new RuntimeException("No results had the longEntry");
+        throw new RuntimeException("No results had the longEntry: " + logEntryId);
     }
 
     public boolean isListAllChecked() {
