@@ -30,7 +30,7 @@
             android:text="Riverrun"
             android:textSize="10pt"
             android:textColor="@color/smartwave_white"
-            android:fontFamily="sans-serif"
+            android:fontFamily="sans-serif-thin"
             android:layout_weight="1"/>
         <Button
             android:id="@+id/fragment_item_list_complete_log"
@@ -38,6 +38,7 @@
             android:layout_height="35dp"
             android:layout_weight="0"
             android:text="Finish"
+            android:layout_gravity="center_vertical"
             android:background="@drawable/holo_button"
             android:textColor="@drawable/holo_button_text"/>
     </LinearLayout>
