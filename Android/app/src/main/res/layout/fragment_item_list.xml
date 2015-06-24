@@ -5,12 +5,11 @@
     android:orientation="vertical"
     android:background="@color/smartwave_white"
     tools:context="com.scanner.bth.bluetoothscanner.ItemFragment">
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/fragment_item_location_bar"
         android:layout_alignParentTop="true"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:orientation="horizontal"
+        android:layout_height="wrap_content"
         android:background="@color/smartwave_cyan"
         >
         <!-- Login progress -->
@@ -18,29 +17,32 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_margin="5dp"
-            android:gravity="center_vertical"
+            android:layout_centerVertical="true"
             android:visibility="invisible"
+            android:layout_alignParentLeft="true"
             />
         <TextView
             android:id="@+id/fragment_item_list_log_location"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:paddingLeft="10dp"
             android:text="Riverrun"
             android:textSize="10pt"
             android:textColor="@color/smartwave_white"
-            android:fontFamily="sans-serif"
-            android:layout_weight="1"/>
-        <Button
+            android:fontFamily="sans-serif-thin"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/scan_progress"
+            />
+        <ImageView
             android:id="@+id/fragment_item_list_complete_log"
-            android:layout_width="100dp"
-            android:layout_height="35dp"
-            android:layout_weight="0"
-            android:text="Finish"
-            android:background="@drawable/holo_button"
-            android:textColor="@drawable/holo_button_text"/>
-    </LinearLayout>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_margin="13dp"
+            android:background="@drawable/finish_button_selector"
+            android:layout_alignParentRight="true"/>
+    </RelativeLayout>
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"

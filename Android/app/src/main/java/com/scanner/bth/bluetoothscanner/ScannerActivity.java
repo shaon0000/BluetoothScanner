@@ -100,7 +100,7 @@ public class ScannerActivity extends ActionBarActivity implements
         TechnicalDetailFragment techFragment = TechnicalDetailFragment.newInstance(uuid, major, minor, battery, range);
 
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.container, techFragment)
+                .replace(R.id.container, techFragment)
                 .addToBackStack(TAG_TECH_FRAGMENT)
                 .commit();
     }
@@ -110,7 +110,7 @@ public class ScannerActivity extends ActionBarActivity implements
         ReportFragment reportFragment = ReportFragment.newInstance(UUID.fromString(mLogId));
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
-                .add(R.id.container, reportFragment)
+                .replace(R.id.container, reportFragment)
                         // Add this transaction to the back stack
                 .addToBackStack(TAG_REPORT_FRAGMENT)
                 .commit();
@@ -165,7 +165,7 @@ public class ScannerActivity extends ActionBarActivity implements
             mSmokeFragment = SmokeScreenFragment.newInstance();
             getSupportFragmentManager().beginTransaction()
                     .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                    .add(R.id.container, mSmokeFragment)
+                    .replace(R.id.container, mSmokeFragment)
                     .commit();
         }
 
@@ -275,7 +275,7 @@ public class ScannerActivity extends ActionBarActivity implements
         DetailFragment detailFragment = DetailFragment.newInstance(result.getlogEntry().getId(), "test", result.getLocationDevice().getName(), 0);
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
-                .add(R.id.container, detailFragment)
+                .replace(R.id.container, detailFragment)
                         // Add this transaction to the back stack
                 .addToBackStack(TAG_DETAIL_FRAGMENT)
                 .commit();
@@ -295,7 +295,7 @@ public class ScannerActivity extends ActionBarActivity implements
         getSupportFragmentManager().beginTransaction()
                 .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
                 .remove(mSmokeFragment)
-                .add(R.id.container, mScanResultFragment, TAG_LIST_FRAGMENT)
+                .replace(R.id.container, mScanResultFragment, TAG_LIST_FRAGMENT)
                 .commit();
 
         if (!mLog.getFinished()) {

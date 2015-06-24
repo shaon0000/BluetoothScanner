@@ -10,6 +10,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
@@ -43,9 +45,10 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
      */
     private AbsListView mListView;
     private TextView mLogNameView;
-    private Button mFinishButton;
+    private ImageView mFinishButton;
     private String mLocationName;
     private ProgressBar mScanProgress;
+    private Animation mFaderAnimation;
 
     @Override
     public void updateView() {
@@ -123,14 +126,24 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
             uuidView.setText(result.getLocationDevice().getName());
 
-
-            if(result.getlogEntry().getCurrentDeviceCheckTime() == 0) {
+            if (result.getlogEntry().getShouldIgnore()) {
+                finishedLogEntryView.setBackgroundResource(R.drawable.reported_problem);
+                finishedLogEntryView.setVisibility(View.VISIBLE);
+            } else if(result.getlogEntry().getCurrentDeviceCheckTime() == 0) {
                 finishedLogEntryView.setVisibility(View.INVISIBLE);
+
             } else {
+                finishedLogEntryView.setBackgroundResource(R.drawable.checkmark);
                 finishedLogEntryView.setVisibility(View.VISIBLE);
             }
 
             indicatorView.setState(result.getStatus());
+            if (result.getStatus() == BthScanResultsModel.ScanResult.COMM) {
+
+                indicatorView.startAnimation(mFaderAnimation);
+            } else {
+                indicatorView.clearAnimation();
+            }
 
             return rowView;
         }
@@ -177,7 +190,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
         mLogNameView = (TextView) view.findViewById(R.id.fragment_item_list_log_location);
-        mFinishButton = (Button) view.findViewById(R.id.fragment_item_list_complete_log);
+        mFinishButton = (ImageView) view.findViewById(R.id.fragment_item_list_complete_log);
         mScanProgress = (ProgressBar) view.findViewById(R.id.scan_progress);
         mFinishButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -190,6 +203,7 @@ public class ItemFragment extends Fragment implements AbsListView.OnItemClickLis
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
+        mFaderAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in_out);
         updateView();
         return view;
     }

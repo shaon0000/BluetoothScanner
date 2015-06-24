@@ -3,16 +3,19 @@ package com.scanner.bth.bluetoothscanner;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import java.util.HashMap;
 
-public abstract class StatusIndicatorView extends View {
+public abstract class StatusIndicatorView extends FrameLayout {
 
     HashMap<Integer, Integer> indicatorMap = new HashMap<Integer, Integer>();
 
     public void setState(int state) {
         Integer colour = indicatorMap.get(state);
         setBackgroundColor(colour);
+
     }
 
     public StatusIndicatorView(Context context, AttributeSet attrs) {

@@ -10,15 +10,15 @@
         android:layout_margin="10dp"
         android:layout_width="75dp"
         android:layout_height="75dp"
-        android:layout_gravity="center"/>
-
-            <ImageView
-                android:id="@+id/bth_scan_result_finished_log_entry"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_margin="10dp"
-                android:background="@drawable/check"/>
+        android:layout_gravity="center">
+        <ImageView
+            android:id="@+id/bth_scan_result_finished_log_entry"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/checkmark"
+            android:visibility="gone"/>
+        </com.scanner.bth.bluetoothscanner.MouseIndicatorView>
             <TextView
 
                 android:id="@+id/bth_scan_result_uuid"

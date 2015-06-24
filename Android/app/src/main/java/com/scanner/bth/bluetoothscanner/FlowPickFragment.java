@@ -60,6 +60,7 @@ public class FlowPickFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     private Button mLogoutButton;
+    private Button mAboutButton;
 
     /**
      * Use this factory method to create a new instance of
@@ -105,6 +106,15 @@ public class FlowPickFragment extends Fragment {
         mSyncButton = (Button) root.findViewById(R.id.flow_pick_sync);
         mDownloadButton = (Button) root.findViewById(R.id.flow_pick_download);
         mLogoutButton = (Button) root.findViewById(R.id.flow_pick_logout);
+        mAboutButton = (Button) root.findViewById(R.id.flow_pick_about);
+
+        mAboutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mListener.onAboutButtonClick();
+            }
+        });
+
         mSyncButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -201,6 +211,7 @@ public class FlowPickFragment extends Fragment {
         public void onNewLogButtonClick();
         public void onSyncButtonClick();
         public void onOldLogButtonClick();
+        public void onAboutButtonClick();
     }
 
 

@@ -21,7 +21,7 @@ import java.util.UUID;
 
 
 public class FlowPickActivity extends Activity implements FlowPickFragment.OnFragmentInteractionListener,
-        LocationFragment.OnFragmentInteractionListener {
+        LocationFragment.OnFragmentInteractionListener, AboutFragment.OnFragmentInteractionListener {
     private static final String FLOW_PICK_FRAGMENT = "flow_pick_fragment";
     private static final String LOCATION_LIST_FRAGMENT = "location_list_fragment";
 
@@ -33,6 +33,7 @@ public class FlowPickActivity extends Activity implements FlowPickFragment.OnFra
     private static final String SMOKE_SCREEN_FRAGMENT = "smoke_screen_fragment";
     private static final int OLD_LOG_REQUEST_CODE = 2;
     private static final int NEW_LOG_REQUEST_CODE = 3;
+    private static final String ABOUT_FRAGMENT = "about_fragment";
 
     // Instance fields
     Account mAccount;
@@ -124,6 +125,16 @@ public class FlowPickActivity extends Activity implements FlowPickFragment.OnFra
                     .addToBackStack(LOCATION_LIST_FRAGMENT)
                     .commit();
         }
+    }
+
+    @Override
+    public void onAboutButtonClick() {
+        AboutFragment aboutFragment = AboutFragment.newInstance();
+        getFragmentManager().beginTransaction()
+                .setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out)
+                .replace(R.id.activity_flow_pick_container, aboutFragment)
+                .addToBackStack(ABOUT_FRAGMENT)
+                .commit();
     }
 
     @Override

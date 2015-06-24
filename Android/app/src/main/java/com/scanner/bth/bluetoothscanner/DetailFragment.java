@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -55,6 +57,7 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
     private TextView mPreviousMouseFound;
     private TextView mCurrentMouseFound;
     private Button mTechnicalDetailsButton;
+    private Animation mFaderAnimation;
 
     public static DetailFragment newInstance(
             Integer logEntryId, String owner, String deviceName, int position) {
@@ -103,6 +106,7 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
         mPreviousMouseFound = (TextView) rootView.findViewById(R.id.detail_fragment_mouse_last_found);
         mCurrentMouseFound = (TextView) rootView.findViewById(R.id.detail_fragment_mouse_current_mouse_found);
         mTechnicalDetailsButton = (Button) rootView.findViewById(R.id.fragment_detail_technical_details_button);
+        mFaderAnimation = AnimationUtils.loadAnimation(getActivity(), R.anim.fade_in_out);
         updateView();
 
         mTechnicalDetailsButton.setOnClickListener(new View.OnClickListener() {
@@ -199,7 +203,12 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
 
 
         mStatusView.setState(mScanResult.getStatus());
+        if (mScanResult.getStatus() == BthScanResultsModel.ScanResult.COMM) {
 
+            mStatusView.startAnimation(mFaderAnimation);
+        } else {
+            mStatusView.clearAnimation();
+        }
         // If we're searching or we're communicating, we can't type up a message.
         if ((mScanResult.getStatus() & (BthScanResultsModel.ScanResult.SEARCHING | BthScanResultsModel.ScanResult.COMM)) != 0) {
             mFinishButton.setEnabled(false);

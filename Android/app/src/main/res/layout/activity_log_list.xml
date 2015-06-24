@@ -12,7 +12,7 @@
         android:text="Riverrun"
         android:textSize="10pt"
         android:textColor="@color/smartwave_white"
-        android:fontFamily="sans-serif"
+        android:fontFamily="sans-serif-thin"
         android:orientation="horizontal"
         android:background="@color/smartwave_cyan"/>
     <ListView

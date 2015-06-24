@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.ScanResult;
 import android.os.Build;
 import android.bluetooth.le.ScanCallback;
+import android.util.Log;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -105,6 +106,7 @@ public class BthScanModel {
             notifyScanStart();
             mScanning = true;
             if (SPOOF_DEVICES) {
+                Log.d(BthScanModel.class.getSimpleName(), "spoofing devices");
                 spoofScanner.startScan(mVirtualCallback);
             } else {
                 mBluetoothAdapter.getBluetoothLeScanner().startScan(mLeScanCallback);

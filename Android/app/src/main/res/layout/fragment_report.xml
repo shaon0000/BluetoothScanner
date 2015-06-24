@@ -12,7 +12,7 @@
         android:text="@string/fragment_report_title"
         android:textColor="@color/smartwave_white"
         android:textSize="10pt"
-        android:fontFamily="sans-serif"
+        android:fontFamily="sans-serif-thin"
         android:background="@color/smartwave_cyan"
         android:gravity="center"/>
 

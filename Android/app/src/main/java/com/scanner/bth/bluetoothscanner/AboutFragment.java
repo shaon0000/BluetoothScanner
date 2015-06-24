@@ -1,91 +1,62 @@
 package com.scanner.bth.bluetoothscanner;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.os.Handler;
+import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link SmokeScreenFragment.OnFragmentInteractionListener} interface
+ * {@link AboutFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link SmokeScreenFragment#newInstance} factory method to
+ * Use the {@link AboutFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class SmokeScreenFragment extends Fragment {
+public class AboutFragment extends Fragment {
+
     private OnFragmentInteractionListener mListener;
-    private Handler mHandler;
-    private Runnable mSmokeRun;
 
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @return A new instance of fragment SmokeScreenFragment.
+     * @param param1 Parameter 1.
+     * @param param2 Parameter 2.
+     * @return A new instance of fragment AboutFragment.
      */
-    public static SmokeScreenFragment newInstance() {
-        SmokeScreenFragment fragment = new SmokeScreenFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
+    // TODO: Rename and change types and number of parameters
+    public static AboutFragment newInstance() {
+        AboutFragment fragment = new AboutFragment();
         return fragment;
     }
 
-    public SmokeScreenFragment() {
+    public AboutFragment() {
         // Required empty public constructor
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        View rootView = inflater.inflate(R.layout.fragment_about, container, false);
 
-        View rootView = inflater.inflate(R.layout.fragment_smoke_screen, container, false);
-        WebView wv = (WebView) rootView.findViewById(R.id.smoke_web_view);
-        wv.setWebViewClient(new WebViewController());
-        wv.setBackgroundColor(Color.TRANSPARENT);
-        wv.loadDataWithBaseURL("file:///android_asset/", "<html><center><img src=\"earth_spinning.gif\"></html>", "text/html", "utf-8", "");
+
         return rootView;
     }
-    private class WebViewController extends WebViewClient {
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            view.loadUrl(url);
-            return true;
-        }
-    }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-
-        if (mHandler != null) {
-            throw new RuntimeException("onAttach was somehow called twice in a row");
-        }
-        mHandler = new Handler();
-        mSmokeRun = new Runnable() {
-            @Override
-            public void run() {
-                mListener.finishedFakeScreen();
-            }
-        };
-
-        mHandler.postDelayed(mSmokeRun, 5000);
-
         try {
             mListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
@@ -98,9 +69,6 @@ public class SmokeScreenFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
-        mHandler.removeCallbacks(mSmokeRun);
-        mHandler = null;
-        mSmokeRun = null;
     }
 
     /**
@@ -114,7 +82,6 @@ public class SmokeScreenFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        void finishedFakeScreen();
     }
 
 }
