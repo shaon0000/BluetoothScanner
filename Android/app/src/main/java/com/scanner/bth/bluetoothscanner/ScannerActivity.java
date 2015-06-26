@@ -26,6 +26,7 @@ import com.scanner.bth.db.LogEntry;
 
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 import java.util.UUID;
 
 
@@ -39,6 +40,7 @@ public class ScannerActivity extends ActionBarActivity implements
     // Used to grab devices to pre-populate the list
     public static final String INTENT_EXTRA_LOCATION_ID = "com.scanner.bth.bluetoothscanner.MainActivity.location_id";
     private static final String TAG_TECH_FRAGMENT = "bth_technical_fragment";
+    public static final String IGNORE_GPS_EXTRA = "com.scanner.bth.bluetoothscanner.ScannerActivity.ignore_gps";
 
     private BluetoothAdapter mBluetoothAdapter;
     private BthScanModel mScanModel;
@@ -59,6 +61,7 @@ public class ScannerActivity extends ActionBarActivity implements
     private BthScanResultsModel mScanResultModel;
     private Location mLocation;
     private SmokeScreenFragment mSmokeFragment;
+    private boolean mIgnoreGPS;
 
     @Override
     public BthScanResultsModel getBthScanResultsModel() {
@@ -159,14 +162,19 @@ public class ScannerActivity extends ActionBarActivity implements
         mLogId = getIntent().getExtras().getString(ScannerActivity.LOG_ID_EXTRA);
         mLog = DbHelper.getInstance().getLog(UUID.fromString(mLogId));
         mLocationId = mLog.getLocationId();
-
+        mIgnoreGPS = getIntent().getBooleanExtra(ScannerActivity.IGNORE_GPS_EXTRA, false);
+        Log.d(ScannerActivity.class.getSimpleName(), "ignore GPS: " + mIgnoreGPS);
         mLocation = DbHelper.getInstance().getLocation(mLog.getLocationId());
-        if (mSmokeFragment == null) {
-            mSmokeFragment = SmokeScreenFragment.newInstance();
-            getSupportFragmentManager().beginTransaction()
-                    .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-                    .replace(R.id.container, mSmokeFragment)
-                    .commit();
+        if (mIgnoreGPS) {
+            finishedFakeScreen();
+        } else {
+            if (mSmokeFragment == null) {
+                mSmokeFragment = SmokeScreenFragment.newInstance();
+                getSupportFragmentManager().beginTransaction()
+                        .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                        .replace(R.id.container, mSmokeFragment)
+                        .commit();
+            }
         }
 
 
@@ -199,6 +207,7 @@ public class ScannerActivity extends ActionBarActivity implements
                 @Override
                 public void run() {
                     Log.d("ScannerActivity", "prepulating data");
+
                     for (LogEntry entry : logEntries) {
                         Log.d(ScannerActivity.class.getSimpleName(),entry.getId().toString());
                         BeaconParser.BeaconData data = BeaconParser.read(entry.getByteRecord());
@@ -231,6 +240,8 @@ public class ScannerActivity extends ActionBarActivity implements
         if (mLog.getFinished()) {
             mStartScanButton.setVisible(false);
             mStopScanButton.setVisible(false);
+        } else if (mIgnoreGPS) {
+            mStartScanButton.setVisible(true);
         }
         return true;
     }
@@ -291,15 +302,20 @@ public class ScannerActivity extends ActionBarActivity implements
         if (mScanResultFragment == null) {
             mScanResultFragment = ItemFragment.newInstance(mLocation.getAddress());
         }
-
-        getSupportFragmentManager().beginTransaction()
-                .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
-                .remove(mSmokeFragment)
-                .replace(R.id.container, mScanResultFragment, TAG_LIST_FRAGMENT)
-                .commit();
-
-        if (!mLog.getFinished()) {
-            mStartScanButton.setVisible(true);
+        if (mIgnoreGPS) {
+            getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                    .replace(R.id.container, mScanResultFragment, TAG_LIST_FRAGMENT)
+                    .commit();
+        } else {
+            getSupportFragmentManager().beginTransaction()
+                    .setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
+                    .remove(mSmokeFragment)
+                    .replace(R.id.container, mScanResultFragment, TAG_LIST_FRAGMENT)
+                    .commit();
+            if (!mLog.getFinished()) {
+                mStartScanButton.setVisible(true);
+            }
         }
     }
 
@@ -317,7 +333,6 @@ public class ScannerActivity extends ActionBarActivity implements
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.bth_devices_fragment, container, false);
-
             return rootView;
 
         }

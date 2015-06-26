@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.scanner.bth.auth.AuthHelper;
 import com.scanner.bth.db.DbHelper;
 import com.scanner.bth.db.Location;
 import com.scanner.bth.db.LocationDevice;
@@ -150,7 +151,7 @@ public class FlowPickActivity extends Activity implements FlowPickFragment.OnFra
             case NEW_LOG:
             {
                 packagedIntent = new Intent(FlowPickActivity.this, ScannerActivity.class);
-                UUID logUUID = DbHelper.getInstance().createLog("test", location.getLocationId());
+                UUID logUUID = DbHelper.getInstance().createLog(AuthHelper.getUsername(this), location.getLocationId());
 
                 List<LocationDevice> devices = DbHelper.getInstance().getLocalLocationDevices(location);
 
@@ -184,6 +185,7 @@ public class FlowPickActivity extends Activity implements FlowPickFragment.OnFra
         }
         @Override
         protected Void doInBackground(Void... params) {
+            DbUpdater.updateExternalDirectoryWithImages(FlowPickActivity.this);
             DbUpdater.updateDatabaseWithLocations(FlowPickActivity.this);
             List<Location> locations = DbHelper.getInstance().getAllLocations();
             for(Location location: locations) {

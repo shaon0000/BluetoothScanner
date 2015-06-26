@@ -3,6 +3,8 @@ package com.scanner.bth.http;
 import android.os.Environment;
 import android.util.Log;
 
+import com.scanner.bth.CustomApplication;
+import com.scanner.bth.auth.AuthHelper;
 import com.scanner.bth.db.BthLog;
 import com.scanner.bth.db.Location;
 import com.scanner.bth.db.LocationDevice;
@@ -22,6 +24,7 @@ public class Api {
 
     private static final ArrayList<Location> fakeLocations = new ArrayList<>();
     private static final HashMap<Long, ArrayList<LocationDevice>> devicesPerLocation = new HashMap<>();
+
 
     static {
         /**
@@ -101,7 +104,7 @@ public class Api {
         return false;
     }
 
-    public static enum ReadState {READ_LOCATION_TABLE, READ_DEVICE_TABLE, BASE};
+    public static enum ReadState {READ_LOCATION_TABLE, READ_DEVICE_TABLE, READ_SYNC_EMAIL, BASE};
 
     public static File getMousetrapStorageDir(String filename) {
         File rootPath = new File(Environment.getExternalStorageDirectory(), "mousetrap");
@@ -157,8 +160,11 @@ public class Api {
                         } else if ("DeviceTable".contentEquals(words[words.length - 1])) {
                             state = ReadState.READ_DEVICE_TABLE;
                             continue;
-                        } else {
-                            throw new RuntimeException("START must have LocationTable or DeviceTable, line " + lineNum);
+                        } else if ("SyncEmail".contentEquals(words[words.length - 1])) {
+                            state = ReadState.READ_SYNC_EMAIL;
+                        }
+                        else {
+                            throw new RuntimeException("START must have LocationTable, SyncEmail, or DeviceTable, line " + lineNum);
                         }
                     }
                 } else if (state == ReadState.READ_LOCATION_TABLE) {
@@ -199,6 +205,23 @@ public class Api {
 
                     LocationDevice device = new LocationDevice(values[0], Long.parseLong(values[1]), values[2]);
                     devicesPerLocation.get(device.getLocationId()).add(device);
+                } else if (state == ReadState.READ_SYNC_EMAIL) {
+                    if (line.contentEquals("END")) {
+                        state = ReadState.BASE;
+                        continue;
+                    }
+
+                    String[] values = line.split(",");
+                    if (values.length > 1) {
+                        throw new RuntimeException("too many values found in a row, line " + lineNum);
+                    }
+
+                    for (int i = 0; i < values.length; i++) {
+                        values[i] = values[i].trim();
+                    }
+
+                    AuthHelper.setSyncEmail(values[0], CustomApplication.getContext());
+
                 }
 
 

@@ -9,7 +9,7 @@
         android:id="@+id/fragment_item_location_bar"
         android:layout_alignParentTop="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/main_header_height"
         android:background="@color/smartwave_cyan"
         >
         <!-- Login progress -->
@@ -26,9 +26,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            android:paddingLeft="10dp"
+
             android:text="Riverrun"
-            android:textSize="10pt"
+            android:textSize="@dimen/main_header_font_size"
             android:textColor="@color/smartwave_white"
             android:fontFamily="sans-serif-thin"
             android:layout_centerVertical="true"

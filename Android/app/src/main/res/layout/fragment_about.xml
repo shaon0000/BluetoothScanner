@@ -6,13 +6,13 @@
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="@dimen/main_header_height"
         android:gravity="center_vertical"
         android:fontFamily="sans-serif-thin"
         android:textColor="@color/smartwave_white"
         android:background="@color/smartwave_cyan"
         android:text="About"
-        android:textSize="10pt"
+        android:textSize="@dimen/main_header_font_size"
         android:paddingLeft="25dp"
         />
 
@@ -23,7 +23,7 @@
         android:fontFamily="sans-serif"
         android:textColor="@color/smartwave_blue"
         android:text="App Version"
-        android:textSize="9pt"
+        android:textSize="@dimen/title_font_size"
         android:paddingLeft="25dp"
         android:paddingTop="10dp"
         />
@@ -36,7 +36,7 @@
         android:fontFamily="sans-serif"
         android:textColor="@android:color/black"
         android:text="1.0.0"
-        android:textSize="8pt"
+        android:textSize="@dimen/body_font_size"
         android:paddingLeft="25dp"
         android:paddingTop="2dp"
         />
@@ -47,7 +47,7 @@
         android:fontFamily="sans-serif"
         android:textColor="@color/smartwave_blue"
         android:text="Database Version"
-        android:textSize="9pt"
+        android:textSize="@dimen/title_font_size"
         android:paddingLeft="25dp"
         android:paddingTop="10dp"
         />
@@ -60,7 +60,7 @@
         android:fontFamily="sans-serif"
         android:textColor="@android:color/black"
         android:text="15"
-        android:textSize="8pt"
+        android:textSize="@dimen/body_font_size"
         android:paddingLeft="25dp"
         android:paddingTop="2dp"
         />
@@ -71,7 +71,7 @@
         android:fontFamily="sans-serif"
         android:textColor="@color/smartwave_blue"
         android:text="URL"
-        android:textSize="9pt"
+        android:textSize="@dimen/title_font_size"
         android:paddingLeft="25dp"
         android:paddingTop="10dp"
         />
@@ -84,7 +84,7 @@
         android:fontFamily="sans-serif"
         android:textColor="@android:color/black"
         android:text="http://smartwave.ca"
-        android:textSize="8pt"
+        android:textSize="@dimen/body_font_size"
         android:paddingLeft="25dp"
         android:paddingTop="2dp"
         />
@@ -101,7 +101,7 @@
             android:layout_height="wrap_content"
             android:text="Powered by"
             android:fontFamily="sans-serif"
-            android:textSize="9pt"
+            android:textSize="@dimen/title_font_size"
             android:layout_gravity="center_vertical"
             android:textColor="@android:color/black"/>
         <ImageView

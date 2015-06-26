@@ -11,7 +11,7 @@
         android:layout_height="50dp"
         android:text="@string/fragment_report_title"
         android:textColor="@color/smartwave_white"
-        android:textSize="10pt"
+        android:textSize="@dimen/main_header_font_size"
         android:fontFamily="sans-serif-thin"
         android:background="@color/smartwave_cyan"
         android:gravity="center"/>
@@ -20,7 +20,7 @@
         android:padding="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="8pt"
+        android:textSize="@dimen/body_font_size"
         android:fontFamily="sans-serif"
         android:text="@string/fragment_report_summary_note"/>
 
@@ -36,7 +36,7 @@
             android:layout_height="match_parent"
             android:text="1234 A St. Mousetrap Report"
             android:fontFamily="sans-serif"
-            android:textSize="8pt"
+            android:textSize="@dimen/body_font_size"
             />
 
 
@@ -44,24 +44,24 @@
 <Button
     android:id="@+id/fragment_report_button_submit_report"
     android:layout_width="wrap_content"
-    android:layout_height="50dp"
+    android:layout_height="wrap_content"
     android:text="@string/fragment_report_button_submit_report"
-    android:layout_weight="0"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
     android:layout_gravity="center"
     android:layout_margin="10dp"
     android:background="@drawable/holo_button"
     android:textColor="@drawable/holo_button_text"
-    android:visibility="gone"/>
+    android:visibility="visible"/>
 
 <Button
     android:id="@+id/fragment_report_close_button"
     android:layout_width="wrap_content"
-    android:layout_height="50dp"
-    android:layout_weight="0"
+    android:layout_height="wrap_content"
     android:layout_margin="10dp"
     android:layout_gravity="center"
     android:text="@string/fragment_report_close_button"
     android:background="@drawable/holo_button"
     android:textColor="@drawable/holo_button_text"
-    android:visibility="visible"/>
+    android:visibility="gone"/>
 </LinearLayout>

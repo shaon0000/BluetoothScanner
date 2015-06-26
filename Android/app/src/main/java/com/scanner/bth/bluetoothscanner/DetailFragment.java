@@ -91,6 +91,35 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
 
     }
 
+    public boolean recordErrorMessage(boolean isChecked) {
+        if (isChecked == mScanResult.getlogEntry().getShouldIgnore()) {
+            return false;
+        }
+
+        if (!isChecked) {
+            mScanResult.getlogEntry().setShouldIgnore(false);
+            DbHelper.getInstance().updateLogEntry(mScanResult.getlogEntry());
+            mListener.getBthScanResultsModel().updateViews(mScanResult);
+            return true;
+        }
+
+        String message = mMessageField.getText() == null ? "" : mMessageField.getText().toString();
+        if(message.contentEquals("")) {
+            Toast.makeText(DetailFragment.this.getActivity(), "Must enter a report", Toast.LENGTH_LONG).show();
+            mDeviceNotFound.setChecked(false);
+            return false;
+        }
+        mScanResult.getlogEntry().setShouldIgnore(true);
+
+        return true;
+    }
+
+    public void recordMessage(String message) {
+        mScanResult.getlogEntry().setMessage(message);
+        DbHelper.getInstance().updateLogEntry(mScanResult.getlogEntry());
+        mListener.getBthScanResultsModel().updateViews(mScanResult);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -118,9 +147,16 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
         mFinishButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ((mScanResult.getStatus() & BthScanResultsModel.ScanResult.MOUSE_FOUND) != 0
-                        && (mMessageField.getText().toString().contentEquals("") && !mScanResult.getlogEntry().getShouldIgnore())) {
+
+                if (mScanResult.getlogEntry().getShouldIgnore()) {
+                    recordMessage(mMessageField.getText() == null ? "" : mMessageField.getText().toString());
+                }
+
+                if (((mScanResult.getStatus() & BthScanResultsModel.ScanResult.MOUSE_FOUND) != 0 || mScanResult.getlogEntry().getShouldIgnore())
+                        && mMessageField.getText().toString().contentEquals("")) {
                     Toast.makeText(getActivity(), "A comment is required", Toast.LENGTH_SHORT).show();
+                } else if (mScanResult.getlogEntry().getShouldIgnore() && ((mScanResult.getStatus() & BthScanResultsModel.ScanResult.SEARCHING) != 0)) {
+                    Toast.makeText(getActivity(), "Recorded as broken", Toast.LENGTH_SHORT).show();
                 } else {
                     new ConfirmTask(mMessageField.getText().toString()).execute();
                 }
@@ -130,26 +166,10 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
         mDeviceNotFound.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked == mScanResult.getlogEntry().getShouldIgnore()) {
-                    return;
+                recordErrorMessage(isChecked);
+                if (mScanResult.getlogEntry().getShouldIgnore()) {
+                    recordMessage(mMessageField.getText() == null ? "" : mMessageField.getText().toString());
                 }
-                if (!isChecked) {
-                    mScanResult.getlogEntry().setShouldIgnore(false);
-                    DbHelper.getInstance().updateLogEntry(mScanResult.getlogEntry());
-                    mListener.getBthScanResultsModel().updateViews(mScanResult);
-                    return;
-                }
-
-                String message = mMessageField.getText() == null ? "" : mMessageField.getText().toString();
-                if(message.contentEquals("")) {
-                    Toast.makeText(DetailFragment.this.getActivity(), "Must enter a report", Toast.LENGTH_LONG).show();
-                    mDeviceNotFound.setChecked(false);
-                    return;
-                }
-                mScanResult.getlogEntry().setShouldIgnore(true);
-                mScanResult.getlogEntry().setMessage(message);
-                DbHelper.getInstance().updateLogEntry(mScanResult.getlogEntry());
-                mListener.getBthScanResultsModel().updateViews(mScanResult);
             }
         });
 
@@ -200,7 +220,7 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
             mPreviousMouseFound.setText(new Date(mScanResult.getlogEntry().getLastMouseEvent()).toString());
         }
 
-
+        mDeviceNotFound.setChecked(mScanResult.getlogEntry().getShouldIgnore());
 
         mStatusView.setState(mScanResult.getStatus());
         if (mScanResult.getStatus() == BthScanResultsModel.ScanResult.COMM) {
@@ -222,6 +242,10 @@ public class DetailFragment extends Fragment implements BthScanResultsModel.BthS
         } else {
             mMessageField.setEnabled(true);
             mDeviceNotFound.setEnabled(true);
+        }
+
+        if (mDeviceNotFound.isChecked()) {
+            mFinishButton.setEnabled(true);
         }
 
         if (mLog.getFinished()) {

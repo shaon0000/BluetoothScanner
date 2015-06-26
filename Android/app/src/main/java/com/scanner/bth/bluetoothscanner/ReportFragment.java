@@ -2,19 +2,26 @@ package com.scanner.bth.bluetoothscanner;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.scanner.bth.db.DbHelper;
 import com.scanner.bth.db.BthLog;
+import com.scanner.bth.http.LogMail;
 import com.scanner.bth.report.LogReport;
 
+import java.io.IOException;
 import java.util.UUID;
+
+import javax.mail.MessagingException;
 
 import static com.scanner.bth.bluetoothscanner.ScannerActivity.LOG_ID_EXTRA;
 
@@ -150,5 +157,4 @@ public class ReportFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         public void reportFinished();
     }
-
 }

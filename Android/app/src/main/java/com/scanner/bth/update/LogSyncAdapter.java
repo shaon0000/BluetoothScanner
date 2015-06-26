@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.scanner.bth.auth.AuthHelper;
 import com.scanner.bth.bluetoothscanner.R;
 import com.scanner.bth.db.DbHelper;
 import com.scanner.bth.db.BthLog;
@@ -17,8 +18,13 @@ import com.scanner.bth.db.Location;
 import com.scanner.bth.db.LogEntry;
 import com.scanner.bth.db.LogTable;
 import com.scanner.bth.http.Api;
+import com.scanner.bth.http.LogMail;
+import com.scanner.bth.report.LogReport;
 
+import java.io.IOException;
 import java.util.List;
+
+import javax.mail.MessagingException;
 
 /**
  * Created by shaon on 4/23/2015.
@@ -42,6 +48,8 @@ public class LogSyncAdapter extends AbstractThreadedSyncAdapter {
 
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+        String syncEmail = AuthHelper.getSyncEmail(getContext());
+
         mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext);
         mBuilder.setContentTitle("Syncing logs");
@@ -49,6 +57,11 @@ public class LogSyncAdapter extends AbstractThreadedSyncAdapter {
         mBuilder.setProgress(0, 0, true);
         List<BthLog> logs = DbHelper.getInstance().getLogs(LogTable.LAST_SYNC, true);
         Log.d("LogSyncAdapter", "performing sync");
+        if (syncEmail == null) {
+            mBuilder.setContentText("ERROR: please update from data.dat file! Missing sync email in system. Sync could not be processed");
+            mNotificationManager.notify(NotificationConstant.LOG_UPLOAD_PROGRESS, mBuilder.build());
+            return;
+        }
 
         for(BthLog log: logs) {
 
@@ -70,6 +83,10 @@ public class LogSyncAdapter extends AbstractThreadedSyncAdapter {
                     DbHelper.getInstance().syncLogEntry(entry);
                 }
                 DbHelper.getInstance().syncLog(log);
+                if (log.getFinished()) {
+                    Log.d("LogSyncAdapter", "sending email for finished log: " + log.getUuid());
+                    sendReportEmail(log, syncEmail);
+                }
             } else if (log.getLastSynced() - System.currentTimeMillis() > LOG_LIVE_TIME) {
                 // Log has been in the system for seven days, should be deleted.
                 DbHelper.getInstance().deleteLog(log);
@@ -82,5 +99,39 @@ public class LogSyncAdapter extends AbstractThreadedSyncAdapter {
         mBuilder.setProgress(0, 0, false);
         mNotificationManager.notify(NotificationConstant.LOG_UPLOAD_PROGRESS, mBuilder.build());
 
+    }
+
+    private static final int TRY_LIMIT = 10;
+
+    public boolean sendReportEmail(BthLog log, String email) {
+        LogReport report = new LogReport(log.getUuid());
+        report.loadReport();
+        report.constructReport();
+        String message = report.getReport();
+        int tries = 0;
+        boolean success = false;
+
+        while (!success && tries < TRY_LIMIT) {
+            tries++;
+            Log.d(LogSyncAdapter.class.getSimpleName(), "attempt: " + tries);
+            try {
+                LogMail.sendDemoMessage(message, email);
+                success = true;
+                return true;
+            } catch (MessagingException e) {
+                e.printStackTrace();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+
+            }
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return false;
     }
 }

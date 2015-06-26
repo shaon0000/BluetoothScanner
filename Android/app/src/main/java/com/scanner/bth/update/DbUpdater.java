@@ -2,13 +2,20 @@ package com.scanner.bth.update;
 
 import android.bluetooth.BluetoothClass;
 import android.content.Context;
+import android.os.Environment;
 import android.util.Log;
 
+import com.scanner.bth.bluetoothscanner.R;
 import com.scanner.bth.db.DbHelper;
 import com.scanner.bth.db.Location;
 import com.scanner.bth.db.LocationDevice;
 import com.scanner.bth.http.Api;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +48,39 @@ public class DbUpdater {
         int size = dbDevices.size();
         if (size != devices.size()) {
             throw new RuntimeException("we're adding way more devices than we expected");
+        }
+    }
+
+    public static void updateExternalDirectoryWithImages(Context context) {
+        copyResourceToStorage(R.raw.app_logo, "logo.jpg", context);
+        copyResourceToStorage(R.raw.sw_logo, "sw_logo.jpg", context);
+
+    }
+
+    public static void copyResourceToStorage(int res, String filename, Context context) {
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            in = context.getResources().openRawResource(res);
+            File rootPath = new File(Environment.getExternalStorageDirectory(), "mousetrap");
+            out = new FileOutputStream(new File(rootPath, filename));
+            copyFile(in, out);
+            in.close();
+            in = null;
+            out.flush();
+            out.close();
+            out = null;
+        } catch (Exception e) {
+            Log.e(DbUpdater.class.getSimpleName(), e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private static void copyFile(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[1024];
+        int read;
+        while ((read = in.read(buffer)) != -1) {
+            out.write(buffer, 0, read);
         }
     }
 }

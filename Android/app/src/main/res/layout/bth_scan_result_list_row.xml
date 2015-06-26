@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/checkmark"
-            android:visibility="gone"/>
+            android:visibility="visible"/>
         </com.scanner.bth.bluetoothscanner.MouseIndicatorView>
             <TextView
 
@@ -27,6 +27,6 @@
                 android:layout_height="50dp"
                 android:text="South-west corner"
                 android:gravity="center"
-                android:textSize="9pt"
+                android:textSize="@dimen/title_font_size"
                 />
 </LinearLayout>

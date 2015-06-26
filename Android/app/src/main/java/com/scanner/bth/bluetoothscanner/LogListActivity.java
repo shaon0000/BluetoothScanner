@@ -56,6 +56,7 @@ public class LogListActivity extends ActionBarActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(LogListActivity.this, ScannerActivity.class);
                 intent.putExtra(LOG_ID_EXTRA, logs.get(position).getUuid().toString());
+                intent.putExtra(ScannerActivity.IGNORE_GPS_EXTRA, true);
                 startActivityForResult(intent, SCANNER_ACTIVITY);
             }
         });
